@@ -2,8 +2,6 @@ package seedu.duke.storage;
 
 import seedu.duke.tasklist.Category;
 import seedu.duke.tasklist.CategoryList;
-// import seedu.duke.task.Todo;
-// import seedu.duke.task.Deadline;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,13 +24,11 @@ public class Storage {
         for (int i = 0; i < categoryList.getAmount(); i++) {
             Category cat = categoryList.getCategory(i);
 
-            // Save Todos from this category
             for (int j = 0; j < cat.getTodoList().getSize(); j++) {
                 todoWriter.write(cat.getName() + " | "
                         + cat.getTodoList().get(j).toFileFormat() + System.lineSeparator());
             }
 
-            // Save Deadlines from this category
             for (int j = 0; j < cat.getDeadlineList().getSize(); j++) {
                 deadlineWriter.write(cat.getName() + " | "
                         + cat.getDeadlineList().get(j).toFileFormat() + System.lineSeparator());
@@ -50,12 +46,11 @@ public class Storage {
             try (java.util.Scanner s = new java.util.Scanner(todoFile)) {
                 while (s.hasNext()) {
                     String[] parts = s.nextLine().split(" \\| ");
-                    // Format: Category | T | Status | Description
                     String catName = parts[0];
                     boolean isDone = parts[2].equals("1");
-                    String desc = parts[3];
+                    String priority = parts[3];
+                    String desc = parts[4];
 
-                    // Ensure category exists
                     if (!categoryExists(categoryList, catName)) {
                         categoryList.addCategory(catName);
                     }
@@ -65,6 +60,11 @@ public class Storage {
                     if (isDone) {
                         categoryList.markTodo(catIdx, categoryList.getCategory(catIdx).getTodoList().getSize() - 1);
                     }
+                    int priorityInt = Integer.parseInt(priority);
+                    categoryList.setTodoPriority(catIdx,
+                            categoryList.getCategory(catIdx).getTodoList().getSize() - 1,
+                            priorityInt);
+
                 }
             } catch (java.io.FileNotFoundException e) {
                 System.out.println("No existing Todo file found.");
@@ -75,13 +75,12 @@ public class Storage {
             try (java.util.Scanner s = new java.util.Scanner(deadlineFile)) {
                 while (s.hasNext()) {
                     String[] parts = s.nextLine().split(" \\| ");
-                    // Format: Category | D | Status | Description | ISO-Date
                     String catName = parts[0];
                     boolean isDone = parts[2].equals("1");
                     String desc = parts[3];
                     String dateString = parts[4];
 
-                    DateTimeFormatter storageFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    DateTimeFormatter storageFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
                     java.time.LocalDateTime by = java.time.LocalDateTime.parse(dateString, storageFormatter);
 
                     if (!categoryExists(categoryList, catName)) {
