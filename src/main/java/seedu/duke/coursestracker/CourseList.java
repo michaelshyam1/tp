@@ -5,7 +5,6 @@ import java.util.ArrayList;
 /**
  * Stores all courses in memory.
  * Similar role to TaskList in your Duke iP.
- *
  * MICHAEL:
  * - Your manager class will likely keep one CourseList object
  *   and use it to add/get/remove courses.

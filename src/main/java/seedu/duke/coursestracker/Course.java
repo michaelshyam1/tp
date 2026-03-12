@@ -5,7 +5,6 @@ import java.util.ArrayList;
 /**
  * Represents one university course, e.g. CS2113.
  * Each course contains a list of assessments.
- *
  * MICHAEL:
  * - Your commands will usually first locate a Course,
  *   then perform actions on it (add assessment, list assessments, score, grade).
@@ -34,7 +33,8 @@ public class Course {
         assessments.add(assessment);
     }
     //Adds an assessment into this course.
-     /**
+
+    /**
      * MICHAEL:
      * - Your add-assessment command should call this.
      */
@@ -72,7 +72,8 @@ public class Course {
     }
     //Removes an assessment by name, case-insensitive.
 
-    /** MICHAEL:
+    /**
+     * MICHAEL:
      * - Your delete-assessment command can call this.
      */
 

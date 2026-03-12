@@ -1,10 +1,8 @@
 package seedu.duke.coursestracker;
 /**
  * Represents one assessment component inside a course.
- *
  * Example:
  * Finals, 40% weightage, scored 85 out of 100
- *
  * MICHAEL:
  * - Your parser/manager will create Assessment objects when the user types:
  *   add-assessment CS2113 /n Finals /w 40 /ms 100

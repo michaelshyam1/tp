@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import seedu.duke.coursestracker.Course;
 import seedu.duke.coursestracker.CourseStorage;
@@ -22,7 +24,10 @@ public class CourseStorageTest {
     public void tearDown() {
         File file = new File(TEST_FILE_PATH);
         if (file.exists()) {
-            file.delete();
+            boolean deleted = file.delete();
+            if (!deleted) {
+                throw new RuntimeException("Could not delete test file.");
+            }
         }
     }
 

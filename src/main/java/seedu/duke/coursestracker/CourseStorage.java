@@ -9,7 +9,6 @@ import java.util.Scanner;
 /**
  * Handles saving and loading course data from disk.
  * Similar role to Storage in your Duke iP.
- *
  * MICHAEL:
  * - Your manager/main app should call load() at startup
  *   and save(...) after any modification.
