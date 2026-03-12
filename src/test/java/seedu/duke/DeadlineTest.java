@@ -2,7 +2,6 @@ package seedu.duke;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.duke.task.Deadline;
 import seedu.duke.tasklist.CategoryList;
 
 import java.time.LocalDateTime;
