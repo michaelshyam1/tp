@@ -24,16 +24,24 @@ public class CourseParser {
             arguments = parts[1];
         }
 
-        return switch (command) {
-            case "add" -> handleAddCourse(arguments);
-            case "list" -> courseManager.listCourses();
-            case "delete" -> handleDeleteCourse(arguments);
-            case "view" -> handleViewCourse(arguments);
-            case "add-assessment" -> handleAddAssessment(arguments);
-            case "score" -> handleRecordScore(arguments);
-            case "delete-assessment" -> handleDeleteAssessment(arguments);
-            default -> throw new CourseException("Unknown course command: " + command);
-        };
+        switch (command) {
+        case "add":
+            return handleAddCourse(arguments);
+        case "list":
+            return courseManager.listCourses();
+        case "delete":
+            return handleDeleteCourse(arguments);
+        case "view":
+            return handleViewCourse(arguments);
+        case "add-assessment":
+            return handleAddAssessment(arguments);
+        case "score":
+            return handleRecordScore(arguments);
+        case "delete-assessment":
+            return handleDeleteAssessment(arguments);
+        default:
+            throw new CourseException("Unknown course command: " + command);
+        }
     }
 
     private String handleAddCourse(String args) throws CourseException {
