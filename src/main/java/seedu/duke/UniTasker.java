@@ -206,15 +206,17 @@ public class UniTasker {
 
     public static void handleListCategory(String[] sentence) {
         int sentenceLength = sentence.length;
+        int catIndex;
         switch (sentenceLength) {
         case 2:
             System.out.println(categories);
             break;
         case 3:
-            int catIndex = Integer.parseInt(sentence[2]);
+            catIndex = Integer.parseInt(sentence[2]);
             System.out.println(categories.getCategory(catIndex - 1));
             break;
         default:
+            System.out.println("List command too many arguments");
             break;
         }
     }
