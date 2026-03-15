@@ -1,5 +1,6 @@
 package seedu.duke.calender;
 
+import java.time.LocalDateTime;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -39,7 +40,12 @@ public class Calendar {
         assert task != null : "Cannot register a null task";
 
         if (task instanceof Timed) {
-            LocalDate date = ((Timed) task).getDate().toLocalDate();
+            LocalDateTime dateTime = ((Timed) task).getDate();
+            if (dateTime == null) {
+                logger.log(Level.WARNING, "Timed task missing date: " + task.getDescription());
+                return;
+            }
+            LocalDate date = dateTime.toLocalDate();
             schedule.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
             logger.log(Level.INFO, "Task registered on date: " + date);
         } else {
