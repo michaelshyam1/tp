@@ -48,11 +48,23 @@ public class CategoryList {
         categories.get(categoryIndex).deleteTodo(todoIndex);
     }
 
-    public void markTodo(int categoryIndex, int todoIndex) {
+    public void markTodo(int categoryIndex, int todoIndex) throws UniTaskerException {
+        if (categoryIndex >= this.getAmount()) {
+            throw new UniTaskerException("categoryIndex does not exist.");
+        }
+        if (todoIndex >= categories.get(categoryIndex).getTodoList().getSize()) {
+            throw new UniTaskerException("todoIndex does not exist.");
+        }
         categories.get(categoryIndex).markTodo(todoIndex);
     }
 
-    public void unmarkTodo(int categoryIndex, int todoIndex) {
+    public void unmarkTodo(int categoryIndex, int todoIndex) throws UniTaskerException {
+        if (categoryIndex >= this.getAmount()) {
+            throw new UniTaskerException("categoryIndex does not exist.");
+        }
+        if (todoIndex >= categories.get(categoryIndex).getTodoList().getSize()) {
+            throw new UniTaskerException("todoIndex does not exist.");
+        }
         categories.get(categoryIndex).unmarkTodo(todoIndex);
     }
 
