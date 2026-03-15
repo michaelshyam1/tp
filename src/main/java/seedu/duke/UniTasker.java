@@ -328,6 +328,7 @@ public class UniTasker {
 
     public void run() {
         logger.info("UniTasker session started.");
+        System.out.println("Welcome to UniTasker");
         Scanner in = new Scanner(System.in);
         while (true) {
             if (!in.hasNextLine()) {  // Check if input is available
