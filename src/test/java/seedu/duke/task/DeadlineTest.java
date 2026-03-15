@@ -2,6 +2,7 @@ package seedu.duke.task;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.duke.exception.IllegalDateException;
 import seedu.duke.tasklist.CategoryList;
 
 import java.time.LocalDateTime;
@@ -58,25 +59,26 @@ public class DeadlineTest {
     }
 
     @Test
-    public void parseDateTime_invalidYear_exceptionThrown() {
+    public void parseDateTime_invalidYear_throwsIllegalDateException() {
         // Verifies that years before 2026 throw the correct exception
-        assertThrows(DateTimeParseException.class, () -> {
+        assertThrows(IllegalDateException.class, () -> {
             Deadline.parseDateTime("2025-12-31 2359");
         });
     }
 
     @Test
-    public void parseDateTime_dateOnly_defaultsToLastMinute() {
+    public void parseDateTime_dateOnly_defaultsToLastMinute() throws IllegalDateException {
         // Verifies your logic of defaulting date-only input to 23:59
         LocalDateTime result = Deadline.parseDateTime("2026-05-05");
         assertEquals(23, result.getHour());
         assertEquals(59, result.getMinute());
+        assertEquals(2026, result.getYear());
     }
 
     @Test
     public void parseDateTime_completelyInvalidString_exceptionThrown() {
         // Tests garbage input like "tomorrow" or "2026/13/40"
-        assertThrows(DateTimeParseException.class, () -> {
+        assertThrows(IllegalDateException.class, () -> {
             Deadline.parseDateTime("not a date");
         });
     }
