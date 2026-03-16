@@ -108,6 +108,15 @@ public class UniTasker {
                             + " from category " + (categoryIndex + 1));
                 }
                 break;
+            case "recurring":
+                int groupIndex = Integer.parseInt(sentence[3]);
+                Event eventToDelete = categories.findRecurringEventToDelete(categoryIndex, groupIndex);
+                categories.deleteRecurringEvent(categoryIndex, groupIndex);
+                System.out.println(DOTTED_LINE);
+                System.out.println("This recurring event has been deleted:");
+                System.out.println(eventToDelete.toStringRecurringList());
+                System.out.println(DOTTED_LINE);
+                break;
             default:
                 System.out.println("Unknown delete command. Use: delete category/todo/deadline/event [index]");
                 break;
@@ -300,7 +309,9 @@ public class UniTasker {
             System.out.println(categories.getAllDeadlines());
             break;
         case "event":
+            System.out.println(DOTTED_LINE);
             System.out.println(categories.getAllEvents());
+            System.out.println(DOTTED_LINE);
             break;
         case "range":
             try {
@@ -323,6 +334,12 @@ public class UniTasker {
                 System.out.println("Error: Start date must be earlier than End date " +
                         "(e.g., list range 2026-03-01 2026-03-07)");
             }
+            break;
+        case "recurring":
+            System.out.println(DOTTED_LINE);
+            System.out.println(categories.getAllRecurringEvents());
+            System.out.println(DOTTED_LINE);
+
             break;
         default:
             System.out.println("Unknown list command.");

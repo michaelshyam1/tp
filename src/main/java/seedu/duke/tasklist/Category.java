@@ -87,6 +87,7 @@ public class Category {
     }
 
     public EventList getEventList() {
+        eventList.sortByDate();
         return eventList;
     }
 

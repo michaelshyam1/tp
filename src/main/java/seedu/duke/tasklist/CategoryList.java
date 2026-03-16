@@ -2,8 +2,12 @@ package seedu.duke.tasklist;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import seedu.duke.calender.Calendar;
+import seedu.duke.task.Deadline;
 import seedu.duke.task.Event;
 import seedu.duke.task.Todo;
 
@@ -71,12 +75,12 @@ public class CategoryList {
     }
 
     public void addEvent(int categoryIndex, String description, LocalDateTime from, LocalDateTime to) {
-        categories.get(categoryIndex).addEvent(new seedu.duke.task.Event(description, from, to,false,-1));
+        categories.get(categoryIndex).addEvent(new Event(description, from, to,false,-1));
     }
 
     public void addRecurringWeeklyEventFile(int categoryIndex, String description,
                                             LocalDateTime from, LocalDateTime to,int recurringGroupIndex) {
-        categories.get(categoryIndex).addEvent(new seedu.duke.task.Event(description,
+        categories.get(categoryIndex).addEvent(new Event(description,
                 from, to,true,recurringGroupIndex));
         recurringGroupId = recurringGroupIndex;
     }
@@ -84,7 +88,7 @@ public class CategoryList {
     public void addRecurringWeeklyEvent(int categoryIndex, String description,
                                         LocalDateTime from, LocalDateTime to, Calendar calendar){
         recurringGroupId +=1;
-        categories.get(categoryIndex).addRecurringWeeklyEvent(new seedu.duke.task.Event(description,
+        categories.get(categoryIndex).addRecurringWeeklyEvent(new Event(description,
                 from, to,true,recurringGroupId),calendar);
     }
 
@@ -121,7 +125,7 @@ public class CategoryList {
      * @param by            The LocalDateTime of the deadline.
      */
     public void addDeadline(int categoryIndex, String description, LocalDateTime by) {
-        categories.get(categoryIndex).addDeadline(new seedu.duke.task.Deadline(description, by));
+        categories.get(categoryIndex).addDeadline(new Deadline(description, by));
     }
 
     public void deleteDeadline(int categoryIndex, int deadlineIndex) {
@@ -184,5 +188,80 @@ public class CategoryList {
 
     public Event getLatestEvent(int eventCategoryIndex) {
         return categories.get(eventCategoryIndex).getLatestEvent();
+    }
+
+    public String getAllRecurringEvents() {
+        ArrayList<Integer> existingGroups = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ALL RECURRING EVENTS ===").append(System.lineSeparator());
+        for (Category cat : categories) {
+            sb.append(cat.getName()).append(":").append(System.lineSeparator());
+            EventList eventList = cat.getEventList();
+            for (int i=0;i<eventList.getSize();i++){
+                if(eventList.get(i).getIsRecurring()){
+                    if (! existingGroups.contains(eventList.get(i).getRecurringGroupId())) {
+                        sb.append(eventList.get(i).toStringRecurringList() + "\n");
+                        existingGroups.add(eventList.get(i).getRecurringGroupId());
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+    
+    public Event findRecurringEventToDelete(int categoryIndex, int groupIndex){
+        EventList eventList = categories.get(categoryIndex).getEventList();
+        Event event = null;
+        for (int i = eventList.getSize() - 1; i >= 0; i--) {
+            if (eventList.get(i).getRecurringGroupId() == groupIndex) {
+                event = categories.get(categoryIndex).getEvent(i);
+                break;
+            }
+        }
+        return event;
+    }
+
+    public void deleteRecurringEvent(int categoryIndex, int groupIndex) {
+        EventList eventList = categories.get(categoryIndex).getEventList();
+        for (int i = eventList.getSize() - 1; i >= 0; i--) {
+            if (eventList.get(i).getRecurringGroupId() == groupIndex) {
+                int eventIndex = i;
+                categories.get(categoryIndex).deleteEvent(eventIndex);
+            }
+        }
+        // Find existing group numbers
+        ArrayList<Integer> currentGroupNumbers = getCurrentGroupNumbers();
+        Collections.sort(currentGroupNumbers);
+
+        // Add to a hashmap to reassign the number accordingly
+        Map<Integer, Integer> mapping = new HashMap<>();
+        for (int k = 0; k < currentGroupNumbers.size(); k++) {
+            mapping.put(currentGroupNumbers.get(k), k + 1);
+        }
+
+        for (Category cat : categories) {
+            for (int w = 0; w < cat.getEventList().getSize(); w++) {
+                Event event = cat.getEventList().get(w);
+                if (event.getIsRecurring()) {
+                    event.setRecurringGroupId(mapping.get(event.getRecurringGroupId()));
+                }
+            }
+        }
+        recurringGroupId = currentGroupNumbers.size();
+
+    }
+
+    private ArrayList<Integer> getCurrentGroupNumbers() {
+        ArrayList<Integer> currentGroupNumbers = new ArrayList<>();
+        for (Category cat : categories) {
+            EventList newEventList = cat.getEventList();
+            for (int j = 0; j < newEventList.getSize(); j++) {
+                if (newEventList.get(j).getIsRecurring() &&
+                        !currentGroupNumbers.contains(newEventList.get(j).getRecurringGroupId())) {
+                    currentGroupNumbers.add(newEventList.get(j).getRecurringGroupId());
+                }
+            }
+        }
+        return currentGroupNumbers;
     }
 }

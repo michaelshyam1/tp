@@ -30,6 +30,10 @@ public class Event extends Task implements Timed {
         return recurringGroupId;
     }
 
+    public void setRecurringGroupId(int recurringGroupIndex){
+        this.recurringGroupId = recurringGroupIndex;
+    }
+
     public boolean getIsRecurring(){
         return isRecurring;
     }
@@ -48,6 +52,15 @@ public class Event extends Task implements Timed {
         String toFormatted = to.format(displayFormatterTime);
 
         return "[RE][Group " + recurringGroupId + "]" + super.toString()
+                + " (from: " + fromFormatted + " to: " + toFormatted + ")";
+    }
+
+    public String toStringRecurringList() {
+        DateTimeFormatter displayFormatterTime = DateTimeFormatter.ofPattern("EEEE HHmm");
+        String fromFormatted = from.format(displayFormatterTime);
+        String toFormatted = to.format(displayFormatterTime);
+
+        return "[RE][Group " + recurringGroupId + "]" + description
                 + " (from: " + fromFormatted + " to: " + toFormatted + ")";
     }
 

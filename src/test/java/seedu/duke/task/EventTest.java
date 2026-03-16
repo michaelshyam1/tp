@@ -110,9 +110,9 @@ public class EventTest {
         assertEquals(
                 """
                         --- 2026-01-01 ---
-                        [E][ ] consultation (from: 2026-01-01 18:30 to: 2026-02-02 18:30)
+                        [E][ ] consultation (from: 2026-01-01 1830 to: 2026-02-02 1830)
                         --- 2026-01-03 ---
-                        [E][ ] meeting (from: 2026-01-03 18:30 to: 2026-02-03 19:30)
+                        [E][ ] meeting (from: 2026-01-03 1830 to: 2026-02-03 1930)
                         """,
                 outContent.toString()
         );
