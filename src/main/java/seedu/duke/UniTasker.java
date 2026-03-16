@@ -291,7 +291,7 @@ public class UniTasker {
                 int todoIndex1 = Integer.parseInt(sentence[3]) - 1;
                 int todoIndex2 = Integer.parseInt(sentence[4]) - 1;
                 categories.reorderTodo(categoryIndex, todoIndex1, todoIndex2);
-                System.out.println("Todo: " + 
+                System.out.println("Todo: " +
                         categories.getCategory(categoryIndex).getTodo(todoIndex1).getDescription() +
                         " inside category " + (categoryIndex + 1) + " moved to index " + (todoIndex2 + 1));
             } catch (UniTaskerException | NumberFormatException e) {
