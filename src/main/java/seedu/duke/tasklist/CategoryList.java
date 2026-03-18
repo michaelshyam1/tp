@@ -103,11 +103,24 @@ public class CategoryList {
     }
 
     public void addEvent(int categoryIndex, String description, LocalDateTime from, LocalDateTime to) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (description != null && !description.isEmpty()): "Event description should not be empty";
+        assert (from != null && to != null): "Start date and time and end date and time should not be null";
+        assert from.isBefore(to) || from.isEqual(to) : "The start date time must be before the end date time";
+
+
         categories.get(categoryIndex).addEvent(new Event(description, from, to,false,-1));
     }
 
     public void addRecurringWeeklyEventFile(int categoryIndex, String description,
                                             LocalDateTime from, LocalDateTime to,int recurringGroupIndex) {
+        assert (recurringGroupIndex > 0): "Recurring Group Id must be greater than 0";
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (description != null && !description.isEmpty()): "Event description should not be empty";
+        assert (from != null && to != null): "Start date and time and end date and time should not be null";
+        assert from.isBefore(to) || from.isEqual(to) : "The start date time must be before the end date time";
+
+
         categories.get(categoryIndex).addEvent(new Event(description,
                 from, to,true,recurringGroupIndex));
         if (recurringGroupIndex > recurringGroupId) {
@@ -117,20 +130,36 @@ public class CategoryList {
 
     public void addRecurringWeeklyEvent(int categoryIndex, String description,
                                         LocalDateTime from, LocalDateTime to, Calendar calendar){
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (description != null && !description.isEmpty()): "Event description should not be empty";
+        assert (from != null && to != null): "Start date and time and end date and time should not be null";
+        assert from.isBefore(to) || from.isEqual(to) : "The start date time must be before the end date time";
+        assert (calendar != null): "Calendar should exist";
+
         recurringGroupId +=1;
         categories.get(categoryIndex).addRecurringWeeklyEvent(new Event(description,
                 from, to,true,recurringGroupId),calendar);
     }
 
     public void deleteEvent(int categoryIndex, int eventIndex) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (eventIndex >= 0 && eventIndex < categories.get(categoryIndex).getEventList().getSize())
+                : "Event index out of bounds";
+
         categories.get(categoryIndex).deleteEvent(eventIndex);
     }
 
     public void deleteAllEvents(int categoryIndex) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+
         categories.get(categoryIndex).deleteAllEvents();
     }
 
     public void setEventStatus(int categoryIndex, int eventIndex, boolean isDone) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (eventIndex >= 0 && eventIndex < categories.get(categoryIndex).getEventList().getSize())
+                : "Event index out of bounds";
+
         categories.get(categoryIndex).setEventStatus(eventIndex, isDone);
     }
 
@@ -218,10 +247,16 @@ public class CategoryList {
     }
 
     public String getEvent(int categoryIndex, int taskIndex) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (taskIndex >= 0 && taskIndex < categories.get(categoryIndex).getEventList().getSize())
+                : "Event index out of bounds";
+
         return categories.get(categoryIndex).getEvent(taskIndex).toString();
     }
 
     public Event getLatestEvent(int eventCategoryIndex) {
+        assert (eventCategoryIndex >= 0 && eventCategoryIndex < categories.size()) : "Category index out of bounds";
+
         return categories.get(eventCategoryIndex).getLatestEvent();
     }
 
@@ -246,6 +281,8 @@ public class CategoryList {
     }
     
     public Event findRecurringEventToDelete(int categoryIndex, int groupIndex){
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+
         EventList eventList = categories.get(categoryIndex).getEventList();
         Event event = null;
         for (int i = eventList.getSize() - 1; i >= 0; i--) {
@@ -258,6 +295,9 @@ public class CategoryList {
     }
 
     public void deleteRecurringEvent(int categoryIndex, int groupIndex) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (groupIndex > 0) : "Group Id must be greater than 0";
+
         EventList eventList = categories.get(categoryIndex).getEventList();
         for (int i = eventList.getSize() - 1; i >= 0; i--) {
             if (eventList.get(i).getRecurringGroupId() == groupIndex) {
