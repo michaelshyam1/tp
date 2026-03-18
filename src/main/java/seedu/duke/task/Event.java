@@ -2,8 +2,10 @@ package seedu.duke.task;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 public class Event extends Task implements Timed {
+    private static final Logger logger = Logger.getLogger(Event.class.getName());
 
     protected LocalDateTime from;
     protected LocalDateTime to;
@@ -22,6 +24,9 @@ public class Event extends Task implements Timed {
         this.to = to;
         this.isRecurring = isRecurring;
         this.recurringGroupId = recurringGroupId;
+        logger.fine("Event created: " + description + " from " + from  +" to " + to
+                + " recurring " + isRecurring + " recurringGroupId " + recurringGroupId);
+
     }
 
     public LocalDateTime getFrom(){

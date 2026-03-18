@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import seedu.duke.calender.Calendar;
 import seedu.duke.task.Event;
@@ -12,6 +13,8 @@ import seedu.duke.exception.UniTaskerException;
 import seedu.duke.task.Todo;
 
 public class CategoryList {
+    private static final Logger logger = Logger.getLogger(CategoryList.class.getName());
+
     private ArrayList<Category> categories;
     private int recurringGroupId = 0;
 
@@ -110,6 +113,8 @@ public class CategoryList {
 
 
         categories.get(categoryIndex).addEvent(new Event(description, from, to,false,-1));
+        logger.info("Add event: " + description + " from " + from  +" to " + to);
+
     }
 
     public void addRecurringWeeklyEventFile(int categoryIndex, String description,
@@ -126,6 +131,9 @@ public class CategoryList {
         if (recurringGroupIndex > recurringGroupId) {
             recurringGroupId = recurringGroupIndex;
         }
+        logger.info("Add recurring event from file : " + description + " from " + from  + " to " + to +
+                " recurringGroupId " + recurringGroupIndex);
+
     }
 
     public void addRecurringWeeklyEvent(int categoryIndex, String description,
@@ -139,6 +147,8 @@ public class CategoryList {
         recurringGroupId +=1;
         categories.get(categoryIndex).addRecurringWeeklyEvent(new Event(description,
                 from, to,true,recurringGroupId),calendar);
+        logger.info("Add recurring event : " + description + " from " + from  + " to " + to +
+                " recurringGroupId " + recurringGroupId);
     }
 
     public void deleteEvent(int categoryIndex, int eventIndex) {
@@ -147,12 +157,15 @@ public class CategoryList {
                 : "Event index out of bounds";
 
         categories.get(categoryIndex).deleteEvent(eventIndex);
+        logger.info("Delete event at : " + categoryIndex + " " + eventIndex);
     }
 
     public void deleteAllEvents(int categoryIndex) {
         assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
 
         categories.get(categoryIndex).deleteAllEvents();
+        logger.info("Delete all event at : " + categoryIndex);
+
     }
 
     public void setEventStatus(int categoryIndex, int eventIndex, boolean isDone) {
@@ -324,6 +337,8 @@ public class CategoryList {
             }
         }
         recurringGroupId = currentGroupNumbers.size();
+        logger.info("Delete recurring event group at : " + categoryIndex + " " + groupIndex);
+
 
     }
 
