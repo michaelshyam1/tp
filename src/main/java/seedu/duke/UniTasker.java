@@ -1,8 +1,13 @@
 package seedu.duke;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -26,7 +31,11 @@ import seedu.duke.util.DateUtils;
 
 
 public class UniTasker {
+
+    public static final String DOTTED_LINE = "____________________________________________________________";
+
     private static final Logger logger = Logger.getLogger(UniTasker.class.getName());
+
     private static CategoryList categories = new CategoryList();
     private static Calendar calendar = new Calendar();
     private static Storage storage = new Storage("todos.txt", "deadlines.txt", "events.txt");
@@ -85,12 +94,14 @@ public class UniTasker {
                     int categoryIndex = getCategoryIndex(sentence);
                     int taskIndex = Integer.parseInt(sentence[3]) - 1;
                     categories.setEventStatus(categoryIndex, taskIndex, isMark);
+                    System.out.println(DOTTED_LINE);
                     if (isMark) {
                         System.out.println("This task is marked as done:");
                     } else {
                         System.out.println("This task is marked as not done:");
                     }
                     System.out.println(categories.getEvent(categoryIndex, taskIndex));
+                    System.out.println(DOTTED_LINE);
                 } catch (Exception e) {
                     //temp
                 }
@@ -102,6 +113,7 @@ public class UniTasker {
             saveData();
         } catch (Exception e) {
             System.out.println("Error: Could not mark task. Format: mark deadline [cat] [index]");
+
         }
     }
 
@@ -144,8 +156,22 @@ public class UniTasker {
                             + " from category " + (categoryIndex + 1));
                 }
                 break;
+            case "recurring":
+                int groupIndex = Integer.parseInt(sentence[3]);
+                Event eventToDelete = categories.findRecurringEventToDelete(categoryIndex, groupIndex);
+                if (eventToDelete == null) {
+                    throw new UniTaskerException("Choose a positive integer " +
+                            "that represents the group number that belongs to the category");
+                }
+                categories.deleteRecurringEvent(categoryIndex, groupIndex);
+                System.out.println(DOTTED_LINE);
+                System.out.println("This recurring event has been deleted:");
+                System.out.println(eventToDelete.toStringRecurringList());
+                System.out.println(DOTTED_LINE);
+                break;
             default:
-                System.out.println("Unknown delete command. Use: delete category/todo/deadline/event [index]");
+                System.out.println("Unknown delete command. Use: delete category/todo/deadline/event [index] or " +
+                        "delete recurring [category index] [group number]");
                 break;
             }
             saveData();
@@ -219,7 +245,13 @@ public class UniTasker {
                 Deadline newDeadline = categories.getCategory(deadlineCatIdx).getDeadlineList().getLatest();
                 if (newDeadline != null) {
                     calendar.registerTask(newDeadline);
-                    System.out.println(" Got it. I've added this deadline: " + newDeadline);
+                    System.out.println(DOTTED_LINE);
+                    System.out.println(" Got it. I've added this deadline to category: "
+                            + categories.getCategory(deadlineCatIdx).getName());
+                    System.out.println("   " + newDeadline);
+                    int count = categories.getCategory(deadlineCatIdx).getDeadlineList().getSize();
+                    System.out.println(" Now you have " + count + " deadlines in this category.");
+                    System.out.println(DOTTED_LINE);
                 }
             } catch (IllegalDateException e) {
                 System.out.println("[WARNING] " + e.getMessage());
@@ -240,17 +272,76 @@ public class UniTasker {
                 LocalDateTime from = DateUtils.parseDateTime(eventTimeDetails[0]);
                 LocalDateTime to = DateUtils.parseDateTime(eventTimeDetails[1]);
 
-                categories.addEvent(eventCategoryIndex, eventDetails[0], from, to);
+                if (!from.isBefore(to)){
+                    throw new UniTaskerException("Error: Start date and time must be earlier than End date and time " +
+                            "(e.g., add event 1 consultation /from 2026-03-01 1800 2026-03-07 1900)");
+                }
+                categories.addEvent(eventCategoryIndex, eventDetails[0], from,to);
 
                 Event newEvent = categories.getCategory(eventCategoryIndex).getLatestEvent();
-                calendar.registerTask(newEvent);
+                if (newEvent != null) {
+                    calendar.registerTask(newEvent);
+                }
 
+                System.out.println(DOTTED_LINE);
                 System.out.println("This event has been added:");
-                System.out.println(categories.getLatestEvent(eventCategoryIndex));
+                System.out.println(categories.getLatestEvent(eventCategoryIndex).toString());
+                System.out.println(DOTTED_LINE);
+
             } catch (DateTimeParseException | IllegalDateException | IndexOutOfBoundsException e) {
-                System.out.println("Error: Use format yyyy-MM-dd HHmm (e.g., 2026-03-11 1830)");
-            } catch (Exception e) {
+                System.out.println("Error: Use format yyyy-MM-dd HHmm (e.g., 2026-03-11 1830) " +
+                        "and include a description");
+            } catch (UniTaskerException e) {
                 System.out.println("Error: Could not add event. Check your input format.");
+                System.out.println(e.getMessage());
+            }
+            break;
+        case "recurring":
+            try {
+                int eventCategoryIndex = getCategoryIndex(sentence);
+                String raw = String.join(" ", Arrays.copyOfRange(sentence, 5, sentence.length));
+                String[] eventDetails = raw.split(" /from ");
+                String[] eventTimeDetails = eventDetails[1].split(" /to ");
+
+                String fromDayOfWeek = eventTimeDetails[0].split(" ")[0];
+                String fromTime = eventTimeDetails[0].split(" ")[1];
+
+                String toDayOfWeek = eventTimeDetails[1].split(" ")[0];
+                String toTime = eventTimeDetails[1].split(" ")[1];
+                LocalDate today = LocalDate.now();
+
+                LocalDate dateFrom = today.with(TemporalAdjusters.nextOrSame(
+                        DayOfWeek.valueOf(fromDayOfWeek.toUpperCase())));
+                LocalDateTime from = LocalDateTime.of(dateFrom,
+                        LocalTime.parse(fromTime, DateTimeFormatter.ofPattern("HHmm")));
+
+                LocalDate dateTo = today.with(TemporalAdjusters.nextOrSame(
+                        DayOfWeek.valueOf(toDayOfWeek.toUpperCase())));
+                LocalDateTime to = LocalDateTime.of(dateTo, LocalTime.parse(
+                        toTime, DateTimeFormatter.ofPattern("HHmm")));
+
+                if (!from.isBefore(to)) {
+                    throw new UniTaskerException("Error: Start date and time must be earlier than End date and time " +
+                            "(e.g., add recurring 1 weekly event CS2113 lecture /from Friday 1600 /to Friday 1800)");
+                }
+                if (!(sentence[3].equals("weekly") && sentence[4].equals("event"))){
+                    throw new UniTaskerException("");
+                }
+                categories.addRecurringWeeklyEvent(eventCategoryIndex, eventDetails[0], from, to, calendar);
+
+                System.out.println(DOTTED_LINE);
+                System.out.println("This recurring event has been added:");
+                System.out.println(categories.getLatestEvent(eventCategoryIndex).toStringRecurring());
+                System.out.println(DOTTED_LINE);
+
+            } catch (DateTimeParseException | IllegalArgumentException e) {
+                System.out.println("Error: Could not add event. Check your input format, " +
+                        "ensure that there is start date and time and end date and time, the date format EEEE HHmm " +
+                        "where EEEE is 'Monday','Tuesday', 'Wednesday', 'Thursday','Friday','Saturday','Sunday'");
+            } catch (Exception e) {
+                System.out.println("Error: Could not add event. Check your input format. " +
+                        "(e.g., add recurring 1 weekly event CS2113 lecture /from Friday 1600 /to Friday 1800)");
+                System.out.println(e.getMessage());
             }
             break;
         default:
@@ -365,7 +456,9 @@ public class UniTasker {
             System.out.println(categories.getAllDeadlines());
             break;
         case "event":
+            System.out.println(DOTTED_LINE);
             System.out.println(categories.getAllEvents());
+            System.out.println(DOTTED_LINE);
             break;
         case "range":
             try {
@@ -397,6 +490,12 @@ public class UniTasker {
             } catch (IllegalDateException e) {
                 System.out.println("Error: " + e.getMessage());
             }
+            break;
+        case "recurring":
+            System.out.println(DOTTED_LINE);
+            System.out.println(categories.getAllRecurringEvents());
+            System.out.println(DOTTED_LINE);
+
             break;
         default:
             System.out.println("Unknown list command.");
@@ -455,51 +554,42 @@ public class UniTasker {
             }
             String line;
             line = in.nextLine();
-            if (line.trim().isEmpty()) {
-                continue;
-            }
-            try {
-                String[] sentence = line.split(" ");
-                String commandWord = sentence[0];
-                switch (commandWord) {
-                case "exit":
-                case "bye":
-                    System.out.println("Exiting UniTasker.");
-                    return;
-                case "add":
-                    handleAdd(sentence);
-                    break;
-                case "delete":
-                    handleDelete(sentence);
-                    break;
-                case "list":
-                    handleList(sentence);
-                    break;
-                case "mark":
-                    handleMark(sentence, true);
-                    break;
-                case "unmark":
-                    handleMark(sentence, false);
-                    break;
-                case "reorder":
-                    handleReorder(sentence);
-                    break;
-                case "priority":
-                    handlePriority(sentence);
-                    break;
-                case "sort":
-                    handleSort(sentence);
-                    break;
-                case "course":
-                    handleCourse(line);
-                    break;
-                default:
-                    System.out.println("default echo: " + line);
-                    break;
-                }
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "Internal Error", t);
-                System.out.println("Oops! An error occurred, but I'm still running. Try again.");
+            String[] sentence = line.split(" ");
+            String commandWord = sentence[0];
+            switch (commandWord) {
+            case "exit":
+                System.out.println("Exiting UniTasker.");
+                return;
+            case "add":
+                handleAdd(sentence);
+                break;
+            case "delete":
+                handleDelete(sentence);
+                break;
+            case "list":
+                handleList(sentence);
+                break;
+            case "mark":
+                handleMark(sentence, true);
+                break;
+            case "unmark":
+                handleMark(sentence, false);
+                break;
+            case "reorder":
+                handleReorder(sentence);
+                break;
+            case "priority":
+                handlePriority(sentence);
+                break;
+            case "sort":
+                handleSort(sentence);
+                break;
+            case "course":
+                handleCourse(line);
+                break;
+            default:
+                System.out.println("default echo: " + line);
+                break;
             }
         }
         in.close();

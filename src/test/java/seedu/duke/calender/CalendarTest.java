@@ -101,7 +101,7 @@ public class CalendarTest {
         LocalDateTime dateTime = date.atTime(12, 0);
 
         calendar.registerTask(new Deadline("I am a Deadline", dateTime));
-        calendar.registerTask(new Event("I am an Event", dateTime, dateTime.plusHours(1)));
+        calendar.registerTask(new Event("I am an Event", dateTime, dateTime.plusHours(1),false,-1));
 
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));

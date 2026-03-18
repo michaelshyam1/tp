@@ -1,5 +1,6 @@
 package seedu.duke.tasklist;
 
+import seedu.duke.calender.Calendar;
 import seedu.duke.exception.UniTaskerException;
 import seedu.duke.task.Deadline;
 import seedu.duke.task.Event;
@@ -62,6 +63,10 @@ public class Category {
         eventList.add(event);
     }
 
+    public void addRecurringWeeklyEvent(Event event, Calendar calendar){
+        eventList.addRecurringWeeklyEvent(event,calendar);
+    }
+
     public void deleteEvent(int index) {
         eventList.delete(index);
     }
@@ -83,6 +88,7 @@ public class Category {
     }
 
     public EventList getEventList() {
+        eventList.sortByDate();
         return eventList;
     }
 
