@@ -14,9 +14,12 @@ import static seedu.duke.UniTasker.handleList;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 
 public class EventTest {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
@@ -44,7 +47,7 @@ public class EventTest {
         System.setOut(new PrintStream(outContent));
         handleAdd("add event 1 interview /from 2026/01/02 1800 /to 2026/01/02 1900".split(" "));
         assertEquals(
-                "Error: Use format yyyy-MM-dd HHmm (e.g., 2026-03-11 1830)",
+                "Error: Use format yyyy-MM-dd HHmm (e.g., 2026-03-11 1830) and include a description",
                 outContent.toString().trim()
         );
     }
@@ -112,9 +115,9 @@ public class EventTest {
         assertEquals(
                 """
                         --- 2026-01-01 ---
-                        [E][ ] consultation (from: 2026-01-01 18:30 to: 2026-02-02 18:30)
+                        [E][ ] consultation (from: 2026-01-01 1830 to: 2026-02-02 1830)
                         --- 2026-01-03 ---
-                        [E][ ] meeting (from: 2026-01-03 18:30 to: 2026-02-03 19:30)
+                        [E][ ] meeting (from: 2026-01-03 1830 to: 2026-02-03 1930)
                         """,
                 outContent.toString()
         );
@@ -148,6 +151,71 @@ public class EventTest {
                 outContent.toString().trim()
         );
 
+    }
+    @Test
+    public void addRecurringEvent_success(){
+        CategoryList categoryList = new CategoryList();
+        categoryList.addCategory("School");
+
+        String fromDayOfWeek = "Friday 1600".split(" ")[0];
+        String fromTime = "Friday 1600".split(" ")[1];
+
+        String toDayOfWeek = "Friday 1800".split(" ")[0];
+        String toTime = "Friday 1800".split(" ")[1];
+        LocalDate today = LocalDate.now();
+
+        LocalDate dateFrom = today.with(TemporalAdjusters.nextOrSame(
+                DayOfWeek.valueOf(fromDayOfWeek.toUpperCase())));
+        LocalDateTime from = LocalDateTime.of(dateFrom,
+                LocalTime.parse(fromTime, DateTimeFormatter.ofPattern("HHmm")));
+
+        LocalDate dateTo = today.with(TemporalAdjusters.nextOrSame(
+                DayOfWeek.valueOf(toDayOfWeek.toUpperCase())));
+        LocalDateTime to = LocalDateTime.of(dateTo, LocalTime.parse(
+                toTime, DateTimeFormatter.ofPattern("HHmm")));
+
+        categoryList.addRecurringWeeklyEvent(0, "CS2113 lecture",from,to,new Calendar());
+        assertEquals(true,categoryList.getLatestEvent(0).getIsRecurring());
+    }
+
+    @Test
+    public void deleteRecurringEvent_success(){
+        CategoryList categoryList = new CategoryList();
+        categoryList.addCategory("School");
+
+        String fromDayOfWeek = "Friday 1600".split(" ")[0];
+        String fromTime = "Friday 1600".split(" ")[1];
+
+        String toDayOfWeek = "Friday 1800".split(" ")[0];
+        String toTime = "Friday 1800".split(" ")[1];
+        LocalDate today = LocalDate.now();
+
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        LocalDate dateFrom = today.with(TemporalAdjusters.nextOrSame(
+                DayOfWeek.valueOf(fromDayOfWeek.toUpperCase())));
+        LocalDateTime from = LocalDateTime.of(dateFrom,
+                LocalTime.parse(fromTime, DateTimeFormatter.ofPattern("HHmm")));
+
+        LocalDate dateTo = today.with(TemporalAdjusters.nextOrSame(
+                DayOfWeek.valueOf(toDayOfWeek.toUpperCase())));
+        LocalDateTime to = LocalDateTime.of(dateTo, LocalTime.parse(
+                toTime, DateTimeFormatter.ofPattern("HHmm")));
+
+        categoryList.addRecurringWeeklyEvent(0, "CS2113 lecture",from,to,new Calendar());
+        int groupIndex = 1;
+        Event eventToDelete = categoryList.findRecurringEventToDelete(0, groupIndex);
+        categoryList.deleteRecurringEvent(0, groupIndex);
+        System.out.println("____________________________________________________________");
+        System.out.println("This recurring event has been deleted:");
+        System.out.println(eventToDelete.toStringRecurringList());
+        System.out.println("____________________________________________________________");
+
+        assertEquals("____________________________________________________________" + System.lineSeparator() +
+                "This recurring event has been deleted:" + System.lineSeparator() +
+                "[RE][Group 1]CS2113 lecture (from: Friday 1600 to: Friday 1800)" + System.lineSeparator() +
+                "____________________________________________________________", outContent.toString().trim());
     }
 
 }
