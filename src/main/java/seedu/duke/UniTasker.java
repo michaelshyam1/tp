@@ -15,6 +15,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import seedu.duke.calender.Calendar;
+import seedu.duke.exception.DuplicateCategoryException;
+import seedu.duke.exception.DuplicateTaskException;
+import seedu.duke.exception.HighWorkloadException;
 import seedu.duke.exception.IllegalDateException;
 import seedu.duke.exception.UniTaskerException;
 import seedu.duke.storage.Storage;
@@ -28,6 +31,7 @@ import seedu.duke.coursestracker.CourseException;
 import seedu.duke.coursestracker.CourseManager;
 import seedu.duke.coursestracker.CourseParser;
 import seedu.duke.util.DateUtils;
+import seedu.duke.util.TaskValidator;
 
 
 public class UniTasker {
@@ -41,6 +45,10 @@ public class UniTasker {
     private static Storage storage = new Storage("todos.txt", "deadlines.txt", "events.txt");
     private static CourseManager courseManager;
     private static CourseParser courseParser;
+
+    private static int dailyTaskLimit;
+    private static int startYear;
+    private static int endYear;
 
     public UniTasker() {
         try {
@@ -205,7 +213,8 @@ public class UniTasker {
                     throw new UniTaskerException("Empty description.");
                 }
                 String[] nameArr = Arrays.copyOfRange(sentence, 2, sentence.length);
-                String name = String.join(" ", nameArr);
+                String name = String.join(" ", nameArr).trim();
+                TaskValidator.validateUniqueCategory(categories, name);
                 categories.addCategory(name);
                 System.out.println("Added category: " + name);
             } catch (Exception e) {
@@ -221,7 +230,8 @@ public class UniTasker {
                     throw new UniTaskerException("Empty description.");
                 }
                 String[] descriptionArr = Arrays.copyOfRange(sentence, 3, sentence.length);
-                String description = String.join(" ", descriptionArr);
+                String description = String.join(" ", descriptionArr).trim();
+                TaskValidator.validateUniqueTask(categories, todoCatIdx, description);
                 categories.addTodo(todoCatIdx, description);
                 System.out.println("Added todo: " + description);
 
@@ -239,14 +249,13 @@ public class UniTasker {
                     break;
                 }
                 String[] parts = raw.split(" /by ");
-                if (parts.length < 2 || parts[1].trim().isEmpty()) {
-                    System.out.println("Error: Please provide a date after '/by'.");
-                    break;
-                }
+                String description = parts[0].trim();
 
                 // Parse and validate (Handles 2026 limit and date-only fallback)
                 LocalDateTime by = Deadline.parseDateTime(parts[1]);
-                Deadline newDeadline = categories.addDeadline(deadlineCatIdx, parts[0], by);
+                TaskValidator.validateWorkload(categories, by, dailyTaskLimit);
+                TaskValidator.validateUniqueTask(categories, deadlineCatIdx, description);
+                Deadline newDeadline = categories.addDeadline(deadlineCatIdx, description, by);
                 refreshCalendar(categories, calendar);
                 if (newDeadline != null) {
                     System.out.println(DOTTED_LINE);
@@ -257,17 +266,16 @@ public class UniTasker {
                     System.out.println(" Now you have " + count + " deadlines in this category.");
                     System.out.println(DOTTED_LINE);
                 }
-            } catch (IllegalDateException e) {
+            } catch (IllegalDateException | DuplicateTaskException | DuplicateCategoryException |
+                     HighWorkloadException e) {
                 System.out.println("[WARNING] " + e.getMessage());
-            } catch (DateTimeParseException e) {
-                System.out.println("Error: Invalid date format.");
             } catch (Exception e) {
                 System.out.println("System Error: " + e.getMessage());
             }
             break;
         case "event":
             try {
-                int eventCategoryIndex = getCategoryIndex(sentence);
+
                 String raw = String.join(" ", Arrays.copyOfRange(sentence, 3, sentence.length));
 
                 String[] eventDetails = raw.split(" /from ");
@@ -276,10 +284,16 @@ public class UniTasker {
                 LocalDateTime from = DateUtils.parseDateTime(eventTimeDetails[0]);
                 LocalDateTime to = DateUtils.parseDateTime(eventTimeDetails[1]);
 
+                int eventCategoryIndex = getCategoryIndex(sentence);
+
                 if (!from.isBefore(to)) {
                     throw new UniTaskerException("Error: Start date and time must be earlier than End date and time " +
-                            "(e.g., add event 1 consultation /from 2026-03-01 1800 2026-03-07 1900)");
+                            "(e.g., add event 1 consultation /from 01-03-2026 1800 07-03-2026 1900)");
                 }
+
+                TaskValidator.validateWorkload(categories, from, dailyTaskLimit);
+                TaskValidator.validateUniqueTask(categories, eventCategoryIndex, eventDetails[0]);
+                TaskValidator.validateNoOverlap(categories.getCategory(eventCategoryIndex).getEventList(), from, to);
                 categories.addEvent(eventCategoryIndex, eventDetails[0], from, to);
 
                 Event newEvent = categories.getCategory(eventCategoryIndex).getLatestEvent();
@@ -292,16 +306,14 @@ public class UniTasker {
                 System.out.println(categories.getLatestEvent(eventCategoryIndex).toString());
                 System.out.println(DOTTED_LINE);
 
-            } catch (DateTimeParseException | IllegalDateException
-                     | IndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("Error: Use format yyyy-MM-dd HHmm (e.g., 2026-03-11 1830) " +
+            } catch (HighWorkloadException | DuplicateTaskException e) {
+                System.out.println("[WARNING] " + e.getMessage());
+            } catch (DateTimeParseException | ArrayIndexOutOfBoundsException | IllegalDateException e) {
+                System.out.println("Error: Use format dd-MM-yyyy HHmm (e.g., 11-12-2026 1830) " +
                         "and follow this format: add event <categoryIndex> <description> " +
                         "/from <startDateTime> /to <endDateTime>");
-            } catch (UniTaskerException e) {
-                System.out.println("Error: Could not add event. Check your input format.");
-                System.out.println(e.getMessage());
             } catch (Exception e) {
-                System.out.println("Error occurred");
+                System.out.println("Error: " + e.getMessage());
             }
             break;
         case "recurring":
@@ -526,8 +538,8 @@ public class UniTasker {
                 LocalDate start = DateUtils.parseLocalDate(sentence[2]);
                 LocalDate end = DateUtils.parseLocalDate(sentence[3]);
 
-                if (start.getYear() < 2026 || end.getYear() < 2026) {
-                    System.out.println("Error: Range search is only available for 2026 onwards.");
+                if (start.getYear() < startYear || end.getYear() > endYear) {
+                    System.out.println("Error: Range search must be within " + startYear + "-" + endYear);
                     break;
                 }
                 if (start.isAfter(end)) {
@@ -541,13 +553,13 @@ public class UniTasker {
                     calendar.displayRange(start, end);
                 }
             } catch (DateTimeParseException e) {
-                System.out.println("Error: Use date format yyyy-mm-dd (e.g., list range 2026-03-01 2026-03-07)");
+                System.out.println("Error: Use date format dd-mm-yyyy (e.g., list range 01-03-2026 07-03-2026)");
             } catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("Error: Include start date and end date using the date format yyyy-mm-dd " +
-                        "(e.g., list range 2026-03-01 2026-03-07)");
+                System.out.println("Error: Include start date and end date using the date format dd-mm-yyyy " +
+                        "(e.g., list range 01-03-2026 07-03-2026)");
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: Start date must be earlier than End date " +
-                        "(e.g., list range 2026-03-01 2026-03-07)");
+                        "(e.g., list range 01-11-2026 07-11-2026)");
             } catch (IllegalDateException e) {
                 System.out.println("Error: " + e.getMessage());
             }
@@ -557,6 +569,12 @@ public class UniTasker {
             System.out.println(categories.getAllRecurringEvents());
             System.out.println(DOTTED_LINE);
 
+            break;
+
+        case "limit":
+            System.out.println(DOTTED_LINE);
+            System.out.println("Current daily task limit: " + dailyTaskLimit);
+            System.out.println(DOTTED_LINE);
             break;
         default:
             System.out.println("Unknown list command.");
@@ -605,6 +623,27 @@ public class UniTasker {
         }
     }
 
+    public static void handleLimit(String[] sentence) {
+        try {
+            if (sentence.length < 3 || !sentence[1].equalsIgnoreCase("task")) {
+                System.out.println("Error: Use format 'limit task [number]'");
+                return;
+            }
+
+            int newLimit = Integer.parseInt(sentence[2]);
+
+            if (newLimit < 1) {
+                System.out.println("Error: Limit must be at least 1 task per day.");
+                return;
+            }
+
+            setDailyTaskLimit(newLimit);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Please provide a valid integer for the limit.");
+        }
+    }
+
     public void run() {
         logger.info("UniTasker session started.");
         System.out.println("Welcome to UniTasker");
@@ -648,6 +687,9 @@ public class UniTasker {
             case "course":
                 handleCourse(line);
                 break;
+            case "limit":
+                handleLimit(sentence);
+                break;
             default:
                 System.out.println("default echo: " + line);
                 break;
@@ -678,10 +720,54 @@ public class UniTasker {
         return categoryIndex;
     }
 
+    public static void setDailyTaskLimit(int newLimit) {
+        dailyTaskLimit = newLimit;
+        System.out.println("Daily task limit updated to: " + dailyTaskLimit);
+    }
+
     public static void main(String[] args) {
         seedu.duke.logging.LogConfig.setup();
         logger.info("UniTasker is launching...");
+        Scanner setupScanner = new Scanner(System.in);
+
+        System.out.println("--- UniTasker Initial Configuration ---");
+
+        startYear = LocalDate.now().getYear();
+
+        System.out.print("Enter the maximum year for planning (e.g., 2030): ");
+        while (!setupScanner.hasNextInt()) {
+            System.out.println("Please enter a valid year.");
+            setupScanner.next();
+        }
+        endYear = setupScanner.nextInt();
+
+        System.out.print("Enter the maximum tasks allowed per day: ");
+        while (!setupScanner.hasNextInt()) {
+            System.out.println("Please enter a valid number.");
+            setupScanner.next();
+        }
+        dailyTaskLimit = setupScanner.nextInt();
+        setupScanner.nextLine();
+
+        System.out.println("Configuration complete! Range: " + startYear + "-" + endYear);
+        System.out.println(DOTTED_LINE);
         new UniTasker().run();
+    }
+
+    public static int getStartYear() {
+        return startYear;
+    }
+
+    public static int getEndYear() {
+        return endYear;
+    }
+
+    public static void setStartYear(int year) {
+        startYear = year;
+    }
+
+    public static void setEndYear(int year) {
+        endYear = year;
     }
 
 }
