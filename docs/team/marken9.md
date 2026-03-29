@@ -27,11 +27,12 @@ Contribution: [RepoSense Link](https://nus-cs2113-ay2526-s2.github.io/tp-dashboa
 General contributions:
 - Commands related to todos and categories
 - Command class refactoring
+- Implement CategoryList class as a central data structure for storing and accessing 
+categories and their associated tasks.
 - Add saving of todos inside the storage class
 
 **Test Coverage Contributions**
 - Integration testing for commands related to categories and todos
-
 
 **Developer Guide Contributions**
 - AppContainer component
@@ -41,4 +42,6 @@ General contributions:
 **User Guide Contributions**
 - Todo specific commands (reorder, priority, sort)
 
-
+**Review/Mentoring Contributions**
+- Reviewed PRs and provided feedback
+- Assist teammates in following the forking workflow
