@@ -9,9 +9,9 @@ import seedu.duke.ui.ErrorUi;
 /**
  * Provides shared utility methods used across command classes.
  *
- * <p></>This class is a stateless utility class and cannot be instantiated.
+ * <p>This class is a stateless utility class and cannot be instantiated.
  * It centralizes common operations such as persisting application data
- * and resolving validated category indices from user input.</>
+ * and resolving validated category indices from user input.
  */
 
 //@@author WenJunYu5984
