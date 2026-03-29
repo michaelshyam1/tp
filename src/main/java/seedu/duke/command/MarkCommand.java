@@ -41,15 +41,14 @@ public class MarkCommand implements Command {
             ErrorUi.printMarkTaskError();
         }
     }
-
+    //@@author marken9
     private void handleTodo(AppContainer container) {
         try {
-            int categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
-            int taskIndex = Integer.parseInt(sentence[3]) - 1;
+            Result result = getResult(container);
             if (isMark) {
-                container.getCategories().markTodo(categoryIndex, taskIndex);
+                container.categories().markTodo(result.categoryIndex(), result.taskIndex());
             } else {
-                container.getCategories().unmarkTodo(categoryIndex, taskIndex);
+                container.categories().unmarkTodo(result.categoryIndex(), result.taskIndex());
             }
             TaskUi.printMarkTodoResult(isMark, null);
         } catch (Exception e) {
@@ -58,12 +57,22 @@ public class MarkCommand implements Command {
     }
 
     //@@author WenJunYu5984
+    private Result getResult(AppContainer container) {
+        int categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
+        int taskIndex = Integer.parseInt(sentence[3]) - 1;
+        return new Result(categoryIndex, taskIndex);
+    }
+
+    private record Result(int categoryIndex, int taskIndex) {
+    }
+
+    //@@author WenJunYu5984
     private void handleDeadline(AppContainer container) {
         try {
-            int categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
-            int taskIndex = Integer.parseInt(sentence[3]) - 1;
-            container.getCategories().setDeadlineStatus(categoryIndex, taskIndex, isMark);
-            TaskUi.printStatusChanged(container.getCategories().getDeadline(categoryIndex, taskIndex), isMark);
+            Result result = getResult(container);
+            container.categories().setDeadlineStatus(result.categoryIndex, result.taskIndex, isMark);
+            TaskUi.printStatusChanged(container.categories()
+                    .getDeadline(result.categoryIndex, result.taskIndex), isMark);
         } catch (Exception e) {
             ErrorUi.printError(e.getMessage());
         }
@@ -72,10 +81,10 @@ public class MarkCommand implements Command {
     //@@author sushmiithaa
     private void handleEvent(AppContainer container) {
         try {
-            int categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
-            int taskIndex = Integer.parseInt(sentence[3]) - 1;
-            container.getCategories().setEventStatus(categoryIndex, taskIndex, isMark);
-            TaskUi.printStatusChanged(container.getCategories().getEvent(categoryIndex, taskIndex).toString(), isMark);
+            Result result = getResult(container);
+            container.categories().setEventStatus(result.categoryIndex, result.taskIndex, isMark);
+            TaskUi.printStatusChanged(container.categories()
+                    .getEvent(result.categoryIndex, result.taskIndex).toString(), isMark);
         } catch (Exception e) {
             ErrorUi.printError(e.getMessage());
         }

@@ -64,6 +64,7 @@ public class AddCommand implements Command {
         CommandSupport.saveData(container);
     }
 
+    //@@author marken9
     private void handleAddCategory(AppContainer container) {
         try {
             if (sentence.length <= 2) {
@@ -72,15 +73,15 @@ public class AddCommand implements Command {
             String[] nameArr = Arrays.copyOfRange(sentence, 2, sentence.length);
             String name = String.join(" ", nameArr).trim();
 
-            TaskValidator.validateUniqueCategory(container.getCategories(), name);
-            container.getCategories().addCategory(name);
+            TaskValidator.validateUniqueCategory(container.categories(), name);
+            container.categories().addCategory(name);
             CategoryUi.printCategoryAdded(name);
         } catch (Exception e) {
             ErrorUi.printCommandFailed("add category", e.getMessage(),
                     "add category [description]");
         }
     }
-
+    //@@author marken9
     private void handleAddTodo(AppContainer container) {
         try {
             int todoCatIdx = CommandSupport.getCategoryIndex(container, sentence);
@@ -90,8 +91,8 @@ public class AddCommand implements Command {
             String[] descriptionArr = Arrays.copyOfRange(sentence, 3, sentence.length);
             String description = String.join(" ", descriptionArr).trim();
 
-            TaskValidator.validateUniqueTask(container.getCategories(), todoCatIdx, description);
-            container.getCategories().addTodo(todoCatIdx, description);
+            TaskValidator.validateUniqueTask(container.categories(), todoCatIdx, description);
+            container.categories().addTodo(todoCatIdx, description);
             TaskUi.printTaskAction("Added", "todo", description);
         } catch (Exception e) {
             ErrorUi.printCommandFailed("add todo", e.getMessage(),
@@ -116,18 +117,18 @@ public class AddCommand implements Command {
 
             LocalDateTime by = Deadline.parseDateTime(dateString);
             TaskValidator.validateWorkload(
-                    container.getCategories(), by, container.getDailyTaskLimit());
+                    container.categories(), by, container.getDailyTaskLimit());
             TaskValidator.validateUniqueTask(
-                    container.getCategories(), deadlineCatIdx, description);
+                    container.categories(), deadlineCatIdx, description);
 
-            Deadline newDeadline = container.getCategories().addDeadline(deadlineCatIdx, description, by);
-            refreshCalendar(container.getCategories(), container.getCalendar());
+            Deadline newDeadline = container.categories().addDeadline(deadlineCatIdx, description, by);
+            refreshCalendar(container.categories(), container.calendar());
 
             if (newDeadline != null) {
                 DeadlineUi.printDeadlineAdded(
-                        container.getCategories().getCategory(deadlineCatIdx).getName(),
+                        container.categories().getCategory(deadlineCatIdx).getName(),
                         newDeadline,
-                        container.getCategories().getCategory(deadlineCatIdx).getDeadlineList().getSize()
+                        container.categories().getCategory(deadlineCatIdx).getDeadlineList().getSize()
                 );
             }
         } catch (IllegalDateException e) {
@@ -139,7 +140,7 @@ public class AddCommand implements Command {
         }
     }
 
-    //@@author
+    //@@author sushmiithaa
     private void handleAddEvent(AppContainer container) {
         try {
             if (sentence.length < 9) {
@@ -176,23 +177,23 @@ public class AddCommand implements Command {
             }
 
             TaskValidator.validateWorkload(
-                    container.getCategories(), from, container.getDailyTaskLimit());
+                    container.categories(), from, container.getDailyTaskLimit());
             TaskValidator.validateUniqueTask(
-                    container.getCategories(), eventCategoryIndex, eventDetails[0]);
+                    container.categories(), eventCategoryIndex, eventDetails[0]);
             TaskValidator.validateNoOverlap(
-                    container.getCategories().getCategory(eventCategoryIndex).getEventList(), from, to);
+                    container.categories().getCategory(eventCategoryIndex).getEventList(), from, to);
 
-            container.getCategories().addEvent(eventCategoryIndex, eventDetails[0], from, to);
+            container.categories().addEvent(eventCategoryIndex, eventDetails[0], from, to);
 
-            Event newEvent = container.getCategories().getCategory(eventCategoryIndex).getLatestEvent();
+            Event newEvent = container.categories().getCategory(eventCategoryIndex).getLatestEvent();
             if (newEvent != null) {
-                container.getCalendar().registerTask(newEvent);
+                container.calendar().registerTask(newEvent);
             }
 
             EventUi.printEventAdded(
-                    container.getCategories().getLatestEvent(eventCategoryIndex),
-                    container.getCategories().getCategory(eventCategoryIndex).getName(),
-                    container.getCategories().getCategory(eventCategoryIndex).getEventList().getSize()
+                    container.categories().getLatestEvent(eventCategoryIndex),
+                    container.categories().getCategory(eventCategoryIndex).getName(),
+                    container.categories().getCategory(eventCategoryIndex).getEventList().getSize()
             );
         } catch (HighWorkloadException | DuplicateTaskException e) {
             GeneralUi.printWarning(e.getMessage());
@@ -202,7 +203,7 @@ public class AddCommand implements Command {
             ErrorUi.printError(e.getMessage());
         }
     }
-
+    //@@author sushmiithaa
     private void handleAddRecurring(AppContainer container) {
         try {
             int eventCategoryIndex = CommandSupport.getCategoryIndex(container, sentence);
@@ -272,18 +273,18 @@ public class AddCommand implements Command {
                         throw new UniTaskerException("End date exceeds the allowed year limit of "
                                 + container.getEndYear());
                     }
-                    container.getCategories().addRecurringWeeklyEvent(
+                    container.categories().addRecurringWeeklyEvent(
                             eventCategoryIndex, eventDetails[0], from, to,
-                            container.getCalendar(), null, month);
+                            container.calendar(), null, month);
                 } catch (NumberFormatException e) {
                     throw new UniTaskerException("Invalid number use a positive integer larger than 0");
                 }
             } else if (sentence[sentence.length - 2].equals("/date")) {
                 try {
                     LocalDateTime date = DateUtils.parse(sentence[sentence.length - 1], false);
-                    container.getCategories().addRecurringWeeklyEvent(
+                    container.categories().addRecurringWeeklyEvent(
                             eventCategoryIndex, eventDetails[0], from, to,
-                            container.getCalendar(), date, 0);
+                            container.calendar(), date, 0);
                 } catch (IllegalDateException e) {
                     throw new UniTaskerException("Date is invalid, "
                             + "follow format /date dd-MM-yyyy and keep date within limit");
@@ -294,12 +295,12 @@ public class AddCommand implements Command {
                     throw new UniTaskerException("End date exceeds the allowed year limit of "
                             + container.getEndYear());
                 }
-                container.getCategories().addRecurringWeeklyEvent(
+                container.categories().addRecurringWeeklyEvent(
                         eventCategoryIndex, eventDetails[0], from, to,
-                        container.getCalendar(), null, 0);
+                        container.calendar(), null, 0);
             }
 
-            EventUi.printRecurringEventAdded(container.getCategories().getLatestEvent(eventCategoryIndex));
+            EventUi.printRecurringEventAdded(container.categories().getLatestEvent(eventCategoryIndex));
         } catch (IllegalDateException e) {
             ErrorUi.printError(e.getMessage());
         } catch (UniTaskerException e) {
@@ -308,7 +309,7 @@ public class AddCommand implements Command {
             ErrorUi.printAddRecurringEventFormatError();
         }
     }
-
+    //@@author sushmiithaa
     private String[] getToComponents(String[] eventTimeDetails) throws UniTaskerException {
         String[] toComponents = eventTimeDetails[1].split(" ");
         if (toComponents.length < 2) {

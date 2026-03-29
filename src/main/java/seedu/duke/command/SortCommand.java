@@ -5,6 +5,7 @@ import seedu.duke.exception.UniTaskerException;
 import seedu.duke.ui.ErrorUi;
 import seedu.duke.ui.TaskUi;
 
+//@@author marken9
 public class SortCommand implements Command {
     private final String[] sentence;
 
@@ -27,7 +28,7 @@ public class SortCommand implements Command {
                     throw new UniTaskerException("Insufficient arguments");
                 }
                 int categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
-                container.getCategories().getCategory(categoryIndex).getTodoList().sortByPriority();
+                container.categories().getCategory(categoryIndex).getTodoList().sortByPriority();
                 TaskUi.printSortedByPriority(categoryIndex);
             } catch (Exception e) {
                 ErrorUi.printCommandFailed("sort todo", e.getMessage(), "sort todo [catIndex]");

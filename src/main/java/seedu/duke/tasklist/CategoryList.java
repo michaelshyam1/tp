@@ -343,6 +343,14 @@ public class CategoryList {
         }
     }
 
+    public String getDeadline(int categoryIndex, int taskIndex) {
+        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
+        assert (taskIndex >= 0 && taskIndex < categories.get(categoryIndex).getDeadlineList().getSize())
+                : "Event index out of bounds";
+
+        return categories.get(categoryIndex).getDeadline(taskIndex).toString();
+    }
+
     public String toString() {
         String result = "";
         for (int i = 0; i < categories.size(); i += 1) {
@@ -385,23 +393,5 @@ public class CategoryList {
             }
         }
         return foundTasks;
-    }
-
-    public String getDeadline(int categoryIndex, int taskIndex) {
-        assert (categoryIndex >= 0 && categoryIndex < categories.size()) : "Category index out of bounds";
-        assert (taskIndex >= 0 && taskIndex < categories.get(categoryIndex).getDeadlineList().getSize())
-                : "Event index out of bounds";
-
-        return categories.get(categoryIndex).getDeadline(taskIndex).toString();
-    }
-
-    public Event getEventByStartTime(int categoryIndex, LocalDateTime startTime) {
-        EventList eventList = categories.get(categoryIndex).getEventList();
-        for (int i = 0; i < eventList.getSize(); i++) {
-            if (eventList.get(i).getFrom().equals(startTime)) {
-                return eventList.get(i);
-            }
-        }
-        return null;
     }
 }
