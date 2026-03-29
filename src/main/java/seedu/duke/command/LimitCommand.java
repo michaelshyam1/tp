@@ -30,7 +30,6 @@ public class LimitCommand implements Command {
                     return;
                 }
                 container.setDailyTaskLimit(newValue);
-                LimitUi.printDailyTaskLimitUpdated(newValue);
                 break;
             case "year":
                 if (newValue < container.getStartYear()) {

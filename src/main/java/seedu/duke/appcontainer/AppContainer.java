@@ -1,6 +1,7 @@
 package seedu.duke.appcontainer;
 
 import seedu.duke.calender.Calendar;
+import seedu.duke.UniTasker;
 import seedu.duke.coursestracker.CourseParser;
 import seedu.duke.storage.Storage;
 import seedu.duke.tasklist.CategoryList;
@@ -11,19 +12,13 @@ public class AppContainer {
     private final Storage storage;
     private final CourseParser courseParser;
 
-    private int dailyTaskLimit;
-    private int startYear;
-    private int endYear;
 
     public AppContainer(CategoryList categories, Calendar calendar, Storage storage,
-                      CourseParser courseParser, int dailyTaskLimit, int startYear, int endYear) {
+                        CourseParser courseParser, int dailyTaskLimit, int startYear, int endYear) {
         this.categories = categories;
         this.calendar = calendar;
         this.storage = storage;
         this.courseParser = courseParser;
-        this.dailyTaskLimit = dailyTaskLimit;
-        this.startYear = startYear;
-        this.endYear = endYear;
     }
 
     public CategoryList getCategories() {
@@ -43,22 +38,22 @@ public class AppContainer {
     }
 
     public int getDailyTaskLimit() {
-        return dailyTaskLimit;
+        return UniTasker.getDailyTaskLimit();
     }
 
     public void setDailyTaskLimit(int dailyTaskLimit) {
-        this.dailyTaskLimit = dailyTaskLimit;
+        UniTasker.setDailyTaskLimit(dailyTaskLimit);
     }
 
     public int getStartYear() {
-        return startYear;
+        return UniTasker.getStartYear();
     }
 
     public int getEndYear() {
-        return endYear;
+        return UniTasker.getEndYear();
     }
 
     public void setEndYear(int endYear) {
-        this.endYear = endYear;
+        UniTasker.setEndYear(endYear);
     }
 }

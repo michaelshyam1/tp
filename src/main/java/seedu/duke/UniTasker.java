@@ -9,6 +9,8 @@ import seedu.duke.calender.Calendar;
 import seedu.duke.storage.Storage;
 import seedu.duke.tasklist.CategoryList;
 
+import static seedu.duke.storage.Storage.loadSettings;
+import static seedu.duke.storage.Storage.saveSettings;
 import static seedu.duke.tasklist.CategoryList.refreshCalendar;
 
 import seedu.duke.coursestracker.CourseManager;
@@ -91,6 +93,8 @@ public class UniTasker {
         endYear = DEFAULT_END_YEAR;
         dailyTaskLimit = DEFAULT_DAILY_TASK_LIMIT;
 
+        loadSettings();
+
         boolean isTestMode = args.length > 0 && args[0].equalsIgnoreCase("-test");
         new UniTasker().run(isTestMode);
     }
@@ -105,14 +109,23 @@ public class UniTasker {
 
     public static void setEndYear(int year) {
         endYear = year;
+        saveSettings();
+    }
+
+    public static int getStartYear() {
+        return startYear;
     }
 
     //@@author WenJunYu5984
     public static void setDailyTaskLimit(int newLimit) {
         dailyTaskLimit = newLimit;
         LimitUi.printDailyTaskLimitUpdated(dailyTaskLimit);
+        saveSettings();
+    }
+
+    public static int getDailyTaskLimit() {
+        return dailyTaskLimit;
     }
     //@@author
-
 
 }
