@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 import seedu.duke.appcontainer.AppContainer;
+import seedu.duke.exception.UniTaskerException;
 import seedu.duke.task.Deadline;
 import seedu.duke.task.Event;
 import seedu.duke.ui.CategoryUi;
@@ -23,7 +24,8 @@ public class ListCommand implements Command {
     @Override
     public void execute(AppContainer container) {
         if (sentence.length < 2) {
-            ErrorUi.printUnknownCommand("list", "category, todo, deadline, event, range, recurring or limit");
+            ErrorUi.printUnknownCommand("list", "category, todo, deadline, event, range, " +
+                    "recurring, occurrence or limit");
             return;
         }
 
@@ -34,15 +36,17 @@ public class ListCommand implements Command {
             handleListCategory(container);
             break;
         case "todo":
-            CategoryUi.printList(container.getCategories().getAllTodos());
+            CategoryUi.printList(container.categories().getAllTodos());
             break;
         //@@author WenJunYu5984
         case "deadline":
-            CategoryUi.printList(container.getCategories().getAllDeadlines());
+            CategoryUi.printList(container.categories().getAllDeadlines());
             break;
         //@@author sushmiithaa
         case "event":
-            GeneralUi.printWithBorder(null, container.getCategories().getAllEvents());
+            boolean showAll = (sentence.length > 2 && sentence[2].equalsIgnoreCase("/all"));
+            boolean showNormalEventsOnly = (sentence.length > 2 && sentence[2].equalsIgnoreCase("/normal"));
+            GeneralUi.printWithBorder(null, container.categories().getAllEvents(showAll,showNormalEventsOnly));
             break;
         //@@author WenJunYu5984
         case "range":
@@ -50,7 +54,24 @@ public class ListCommand implements Command {
             break;
         //@@author sushmiithaa
         case "recurring":
-            GeneralUi.printWithBorder(null, container.getCategories().getAllRecurringEvents());
+            GeneralUi.printWithBorder(null, container.categories().getAllRecurringEvents());
+            break;
+        case "occurrence":
+            try {
+                int catIdx = CommandSupport.getCategoryIndex(container, sentence);
+                String currentView = container.categories().getCurrentView();
+                if (!currentView.equals("EVENT")){
+                    throw new UniTaskerException("Please use: list event first before list occurrence");
+                }
+                int recurringUiIdx = Integer.parseInt(sentence[3]);
+                String allRecurringEventsWithinGroup = container.categories()
+                        .getOccurrencesOfRecurringEvent(catIdx, recurringUiIdx);
+                GeneralUi.printWithBorder(null, allRecurringEventsWithinGroup);
+            } catch (UniTaskerException e){
+                ErrorUi.printError(e.getMessage());
+            } catch (Exception e) {
+                ErrorUi.printError("Please use: list event first then list occurrence [cat_idx] [event_idx]");
+            }
             break;
         //@@author WenJunYu5984
         case "limit":
@@ -58,7 +79,8 @@ public class ListCommand implements Command {
             break;
         //@@author
         default:
-            ErrorUi.printUnknownCommand("list", "category, todo, deadline, event, range, recurring or limit");
+            ErrorUi.printUnknownCommand("list", "category, todo, deadline, event, " +
+                    "range, recurring, occurrence or limit");
             break;
         }
     }
@@ -68,12 +90,12 @@ public class ListCommand implements Command {
         int sentenceLength = sentence.length;
         switch (sentenceLength) {
         case 2:
-            CategoryUi.printList(container.getCategories().toString());
+            CategoryUi.printList(container.categories().toString());
             break;
         case 3:
             try {
                 int catIndex = CommandSupport.getCategoryIndex(container, sentence);
-                CategoryUi.printList(container.getCategories().getCategory(catIndex).toString());
+                CategoryUi.printList(container.categories().getCategory(catIndex).toString());
             } catch (Exception e) {
                 ErrorUi.printCommandFailed("list category [index]", e.getMessage(), null);
             }
@@ -99,11 +121,11 @@ public class ListCommand implements Command {
             }
 
             if (sentence.length > 4 && sentence[4].equalsIgnoreCase("/deadline")) {
-                container.getCalendar().displaySpecificTypeInRange(start, end, Deadline.class);
+                container.calendar().displaySpecificTypeInRange(start, end, Deadline.class);
             } else if (sentence.length > 4 && sentence[4].equalsIgnoreCase("/event")) {
-                container.getCalendar().displaySpecificTypeInRange(start, end, Event.class);
+                container.calendar().displaySpecificTypeInRange(start, end, Event.class);
             } else {
-                container.getCalendar().displayRange(start, end);
+                container.calendar().displayRange(start, end);
             }
         } catch (DateTimeParseException e) {
             ErrorUi.printRangeDateFormatError();
