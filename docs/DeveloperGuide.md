@@ -52,8 +52,7 @@ The `AppContainer` consists of the following:
 - `CategoryList categories` – stores all categories and their associated tasks (todos, deadlines, events)
 - `Calendar calendar` – Manages the mapping of dates to tasks with date information (deadlines and events) ???
 - `Storage storage` – handles saving and loading of data from local files
-- `CourseParser courseParser` – processes course-related commands
-
+- `CourseParser courseParser` – processes and handles course-related commands
 
 The `AppContainer` component,
 - Stores all the information required for the application in a single object
