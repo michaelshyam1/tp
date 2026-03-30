@@ -21,11 +21,11 @@ import seedu.duke.task.Todo;
 import seedu.duke.exception.UniTaskerException;
 
 public class CategoryList {
-    private static final Logger logger = Logger.getLogger(CategoryList.class.getName());
-    public static final String EQUALSIGN_LINE = "======================================================================";
     public static final String DOTTED_LINE = "-------------------------------------------------------------------";
+    public static final String EQUALSIGN_LINE = "===============================================================" +
+            "=======";
 
-
+    private static final Logger logger = Logger.getLogger(CategoryList.class.getName());
 
     private ArrayList<Category> categories;
     private int recurringGroupId = 0;
@@ -54,10 +54,6 @@ public class CategoryList {
 
     public String getCurrentView() {
         return currentView;
-    }
-
-    public void setCurrentView(String view) {
-        this.currentView = view;
     }
 
     public void addTodo(int categoryIndex, String description) {
@@ -217,40 +213,35 @@ public class CategoryList {
 
             for (int eventIndex = 0; eventIndex < eventList.getSize(); eventIndex++) {
                 Event event = eventList.get(eventIndex);
-                if (isNormalEventOnly) {
-                    if (!(event.getIsRecurring())) {
-                        sb.append(newMap.size() + 1).append(". ")
-                                .append(event.toString()).append(System.lineSeparator());
-                        newMap.add(new EventReference(categoryIndex, eventIndex));
-                    }
-                } else {
-                    if (event.getIsRecurring()) {
-                        int groupId = event.getRecurringGroupId();
-                        if (isExpanded || !printedGroups.contains(groupId)) {
-                            sb.append(newMap.size() + 1).append(". ")
-                                    .append(isExpanded ? event.toString() : event.toStringRecurring())
-                                    .append(System.lineSeparator());
-                            newMap.add(new EventReference(categoryIndex, eventIndex));
-                            printedGroups.add(groupId);
-                        }
-                    } else {
-                        sb.append(newMap.size() + 1).append(". ")
-                                .append(event.toString()).append(System.lineSeparator());
-                        newMap.add(new EventReference(categoryIndex, eventIndex));
-                    }
+                if (shouldDisplayEvent(event, isExpanded, isNormalEventOnly, printedGroups)) {
+                    displayEvent(sb, event, newMap, categoryIndex, eventIndex, isExpanded);
+                    updatePrintedGroups(event, printedGroups);
                 }
             }
         }
         this.activeDisplayMap = newMap;
         this.currentView = isExpanded ? "EVENT_EXPANDED" : isNormalEventOnly ? "NORMAL_EVENT_ONLY" : "EVENT";
         return sb.toString();
+    }
 
+    private void displayEvent(StringBuilder sb, Event event, List<EventReference> map,
+                              int categoryIndex, int eventIndex, boolean isExpanded) {
+
+        sb.append(map.size() + 1).append(". ")
+                .append(event.getIsRecurring() && !isExpanded ? event.toStringRecurring() : event.toString())
+                .append(System.lineSeparator());
+
+        map.add(new EventReference(categoryIndex, eventIndex));
+    }
+
+    private void updatePrintedGroups(Event event, Set<Integer> printedGroups) {
+        if (event.getIsRecurring()) {
+            printedGroups.add(event.getRecurringGroupId());
+        }
     }
 
     public String getAllRecurringEvents() {
-        ArrayList<Integer> existingGroups = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        int uiIndex = 1;
         List<EventReference> newMap = new ArrayList<>();
         Set<Integer> printedGroups = new HashSet<>();
         sb.append("ALL RECURRING EVENTS").append(System.lineSeparator());
@@ -263,21 +254,41 @@ public class CategoryList {
             eventList.sortByDay();
             for (int eventIndex = 0; eventIndex < eventList.getSize(); eventIndex++) {
                 Event event = eventList.get(eventIndex);
-                if (event.getIsRecurring()) {
-                    int groupId = event.getRecurringGroupId();
-                    if (!printedGroups.contains(groupId)) {
-                        sb.append(newMap.size() + 1).append(". ")
-                                .append(event.toStringRecurring()).append(System.lineSeparator());
-                        newMap.add(new EventReference(categoryIndex, eventIndex));
-                        printedGroups.add(groupId);
-                    }
-                }
+                displayRecurringEvents(event, printedGroups, sb, newMap, categoryIndex, eventIndex);
             }
         }
         this.activeDisplayMap = newMap;
         this.currentView = "RECURRING_OVERVIEW";
         return sb.toString();
     }
+
+    private static void displayRecurringEvents(Event event, Set<Integer> printedGroups, StringBuilder sb,
+            List<EventReference> newMap, int categoryIndex, int eventIndex) {
+        if (event.getIsRecurring()) {
+            int groupId = event.getRecurringGroupId();
+            if (!printedGroups.contains(groupId)) {
+                sb.append(newMap.size() + 1).append(". ")
+                        .append(event.toStringRecurring()).append(System.lineSeparator());
+                newMap.add(new EventReference(categoryIndex, eventIndex));
+                printedGroups.add(groupId);
+            }
+        }
+    }
+
+    private boolean shouldDisplayEvent(Event event, boolean isExpanded,
+                                       boolean isNormalEventOnly, Set<Integer> printedGroups) {
+        if (isNormalEventOnly) {
+            return !event.getIsRecurring();
+        }
+
+        if (event.getIsRecurring()) {
+            int groupId = event.getRecurringGroupId();
+            return isExpanded || !printedGroups.contains(groupId);
+        }
+        return true;
+    }
+
+
 
     public String getOccurrencesOfRecurringEvent(int categoryIndex, int groupUiIndex) throws UniTaskerException {
         EventReference ref = activeDisplayMap.get(groupUiIndex - 1);
