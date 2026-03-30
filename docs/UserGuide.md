@@ -292,7 +292,7 @@ is located in the other computer.
 |-------------|------------------------------------------------------------------------------------------------|
 | help        | `help`                                                                                         |
 | add         | `add category [DESC]`, `add todo [CATEGORYINDEX] [DESC]`,                                      |
-| delete      | `add [keyword]`                                                                                |
+| delete      | `delete [KEYWORD] [CATEGORYINDEX] [TASKINDEX]`, `delete [KEYWORD] [CATEGORYINDEX] all`         |
 | list        | `add [keyword]`                                                                                |
 | mark/unmark | `add [keyword]`                                                                                |
 | reorder     | `reorder category [FROMINDEX] [TOINDEX]`, `reorder todo [CATEGORYINDEX] [FROMINDEX] [TOINDEX]` |

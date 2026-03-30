@@ -17,14 +17,14 @@ This section describes the design and implementation of the key components of Un
 
 ### Architecture
 
-![MainArchitecture]()
+![MainArchitecture](/docs/pictures/MainArchitecture.png)
 
 The **Architecture Diagram** given above explains the high-level design of the App
 
 **Main components of the architecture**
 
 UniTasker is in charge of the app launch and shut down
-- At app launch, it initializes the other components.
+- At app launch, it initializes the other components and repeatedly waits for user inputs.
 - At shut down, it shuts down the other components.
 
 The bulk of the app's work is done by the following components:
