@@ -30,6 +30,22 @@ import seedu.duke.util.TaskValidator;
 import static seedu.duke.tasklist.CategoryList.refreshCalendar;
 
 public class AddCommand implements Command {
+    public static final int ADD_MIN_LENGTH = 2;
+    public static final int ADD_CATEGORY_MIN_LENGTH = 3;
+    public static final int ADD_TODO_MIN_LENGTH = 4;
+    public static final int ADD_EVENT_MIN_LENGTH = 9;
+    public static final int ADD_RECURRING_EVENT_MIN_LENGTH = 5;
+    public static final int MIN_LENGTH_OF_TOFROM_COMPONENTS = 2;
+
+    public static final int INDEX_OF_ADD_TYPE = 1;
+    public static final int INDEX_OF_DAY_EVENTS = 0;
+    public static final int INDEX_OF_TIME_EVENTS = 1;
+    public static final int INDEX_OF_CATEGORY_INFO = 2;
+    public static final int INDEX_OF_TASK_INFO = 3;
+    public static final int INDEX_OF_RECURRING_EVENT_INFO = 5;
+    public static final int INDEX_OF_DEADLINE_EVENT_DESCRIPTION = 0;
+    public static final int INDEX_OF_DEADLINE_EVENT_DATETIME = 1;
+
     private final String[] sentence;
 
     public AddCommand(String[] sentence) {
@@ -38,12 +54,12 @@ public class AddCommand implements Command {
 
     @Override
     public void execute(AppContainer container) {
-        if (sentence.length <= 1) {
+        if (sentence.length < ADD_MIN_LENGTH) {
             ErrorUi.printUnknownCommand("add", "category, todo, deadline or event");
             return;
         }
 
-        String secondCommand = sentence[1];
+        String secondCommand = sentence[INDEX_OF_ADD_TYPE];
         switch (secondCommand) {
         case "category":
             handleAddCategory(container);
@@ -71,10 +87,10 @@ public class AddCommand implements Command {
     //@@author marken9
     private void handleAddCategory(AppContainer container) {
         try {
-            if (sentence.length <= 2) {
+            if (sentence.length < ADD_CATEGORY_MIN_LENGTH) {
                 throw new UniTaskerException("Empty description.");
             }
-            String[] nameArr = Arrays.copyOfRange(sentence, 2, sentence.length);
+            String[] nameArr = Arrays.copyOfRange(sentence, INDEX_OF_CATEGORY_INFO, sentence.length);
             String name = String.join(" ", nameArr).trim();
 
             TaskValidator.validateUniqueCategory(container.categories(), name);
@@ -89,10 +105,10 @@ public class AddCommand implements Command {
     private void handleAddTodo(AppContainer container) {
         try {
             int todoCatIdx = CommandSupport.getCategoryIndex(container, sentence);
-            if (sentence.length <= 3) {
+            if (sentence.length < ADD_TODO_MIN_LENGTH) {
                 throw new UniTaskerException("Empty description.");
             }
-            String[] descriptionArr = Arrays.copyOfRange(sentence, 3, sentence.length);
+            String[] descriptionArr = Arrays.copyOfRange(sentence, INDEX_OF_TASK_INFO, sentence.length);
             String description = String.join(" ", descriptionArr).trim();
 
             TaskValidator.validateUniqueTask(container.categories(), todoCatIdx, description);
@@ -108,7 +124,7 @@ public class AddCommand implements Command {
     private void handleAddDeadline(AppContainer container) {
         try {
             int deadlineCatIdx = CommandSupport.getCategoryIndex(container, sentence);
-            String raw = String.join(" ", Arrays.copyOfRange(sentence, 3, sentence.length));
+            String raw = String.join(" ", Arrays.copyOfRange(sentence, INDEX_OF_TASK_INFO, sentence.length));
 
             if (!raw.contains(" /by ")) {
                 ErrorUi.printMissingByKeyword();
@@ -116,8 +132,8 @@ public class AddCommand implements Command {
             }
 
             String[] parts = raw.split(" /by ");
-            String description = parts[0].trim();
-            String dateString = parts[1].trim();
+            String description = parts[INDEX_OF_DEADLINE_EVENT_DESCRIPTION].trim();
+            String dateString = parts[INDEX_OF_DEADLINE_EVENT_DATETIME].trim();
 
             LocalDateTime by = Deadline.parseDateTime(dateString);
             TaskValidator.validateWorkload(
@@ -147,13 +163,13 @@ public class AddCommand implements Command {
     //@@author sushmiithaa
     private void handleAddEvent(AppContainer container) {
         try {
-            if (sentence.length < 9) {
+            if (sentence.length < ADD_EVENT_MIN_LENGTH) {
                 throw new UniTaskerException("Missing or invalid info. "
                         + "Expected format: add event <categoryIndex> <description> "
                         + "/from <start date> <start time> /to <end date> <end time>");
             }
 
-            String raw = String.join(" ", Arrays.copyOfRange(sentence, 3, sentence.length));
+            String raw = String.join(" ", Arrays.copyOfRange(sentence, INDEX_OF_TASK_INFO, sentence.length));
 
             if (raw.stripLeading().startsWith("/from")) {
                 throw new UniTaskerException("Empty description! Include the event description");
@@ -168,10 +184,10 @@ public class AddCommand implements Command {
             }
 
             String[] eventDetails = raw.split(" /from ");
-            String[] eventTimeDetails = eventDetails[1].split(" /to ");
+            String[] eventTimeDetails = eventDetails[INDEX_OF_DEADLINE_EVENT_DATETIME].split(" /to ");
 
-            LocalDateTime from = DateUtils.parseDateTime(eventTimeDetails[0]);
-            LocalDateTime to = DateUtils.parseDateTime(eventTimeDetails[1]);
+            LocalDateTime from = DateUtils.parseDateTime(eventTimeDetails[INDEX_OF_DAY_EVENTS]);
+            LocalDateTime to = DateUtils.parseDateTime(eventTimeDetails[INDEX_OF_TIME_EVENTS]);
 
             int eventCategoryIndex = CommandSupport.getCategoryIndex(container, sentence);
 
@@ -179,9 +195,9 @@ public class AddCommand implements Command {
                 throw new UniTaskerException("Start date and time must be earlier than End date and time "
                         + "(e.g., add event 1 consultation /from 01-03-2026 1800 /to 07-03-2026 1900)");
             }
-
-            validateEvents(container, from, eventCategoryIndex, eventDetails, to);
-            container.categories().addEvent(eventCategoryIndex, eventDetails[0], from, to);
+            String desc = eventDetails[INDEX_OF_DEADLINE_EVENT_DESCRIPTION];
+            validateEvents(container, from, eventCategoryIndex, desc, to);
+            container.categories().addEvent(eventCategoryIndex, desc, from, to);
 
             Event newEvent = container.categories().getCategory(eventCategoryIndex).getLatestEvent();
             if (newEvent != null) {
@@ -206,13 +222,13 @@ public class AddCommand implements Command {
         try {
             int eventCategoryIndex = CommandSupport.getCategoryIndex(container, sentence);
 
-            if (sentence.length < 5 || !sentence[3].equals("weekly") || !sentence[4].equals("event")) {
+            if (sentence.length < ADD_RECURRING_EVENT_MIN_LENGTH || !sentence[3].equals("weekly") || !sentence[4].equals("event")) {
                 throw new UniTaskerException("Missing or invalid info. "
                         + "Expected format: add recurring <categoryIndex> weekly event <description> "
                         + "/from <day> <time> /to <day> <time>");
             }
 
-            String raw = String.join(" ", Arrays.copyOfRange(sentence, 5, sentence.length));
+            String raw = String.join(" ", Arrays.copyOfRange(sentence, INDEX_OF_RECURRING_EVENT_INFO, sentence.length));
 
             if (raw.stripLeading().startsWith("/from")) {
                 throw new UniTaskerException("Empty description! Include the event description");
@@ -224,24 +240,20 @@ public class AddCommand implements Command {
             }
 
             String[] eventDetails = raw.split(" /from ");
-            if (!(eventDetails[1].contains(" /to "))) {
+            if (!(eventDetails[INDEX_OF_DEADLINE_EVENT_DATETIME].contains(" /to "))) {
                 throw new UniTaskerException("Missing '/to' or wrong format for '/to'. "
                         + "Expected format: add recurring 1 weekly event CS2113 lecture "
                         + "/from Friday 1600 /to Friday 1800");
             }
-            String[] eventTimeDetails = eventDetails[1].split(" /to ");
+            String[] eventTimeDetails = eventDetails[INDEX_OF_DEADLINE_EVENT_DATETIME].split(" /to ");
 
-            String[] fromComponents = eventTimeDetails[0].split(" ");
-            if (fromComponents.length != 2) {
-                throw new UniTaskerException("Missing start day or time after '/from'. "
-                        + "Expected: /from <day> <time> e.g. /from Friday 1600");
-            }
-            String fromDayOfWeek = fromComponents[0];
-            String fromTime = fromComponents[1];
+            String[] fromComponents = getFromToComponents(eventTimeDetails,true);
+            String fromDayOfWeek = fromComponents[INDEX_OF_DAY_EVENTS];
+            String fromTime = fromComponents[INDEX_OF_TIME_EVENTS];
 
-            String[] toComponents = getToComponents(eventTimeDetails);
-            String toDayOfWeek = toComponents[0];
-            String toTime = toComponents[1];
+            String[] toComponents = getFromToComponents(eventTimeDetails,false);
+            String toDayOfWeek = toComponents[INDEX_OF_DAY_EVENTS];
+            String toTime = toComponents[INDEX_OF_TIME_EVENTS];
 
             DateUtils.parseRecurringDayFrom(fromDayOfWeek);
             DateUtils.parseRecurringDayTo(toDayOfWeek);
@@ -262,10 +274,11 @@ public class AddCommand implements Command {
 
             LocalDateTime endDate = null;
             int months = 0;
-
-            if (sentence[sentence.length - 2].equals("/month")) {
+            int indexOfLimitOption = sentence.length - 2;
+            int indexOfMonthDateLimit = sentence.length - 1;
+            if (sentence[indexOfLimitOption].equals("/month")) {
                 try {
-                    months = Integer.parseInt(sentence[sentence.length - 1]);
+                    months = Integer.parseInt(sentence[indexOfMonthDateLimit]);
                     if (months <= 0) {
                         throw new UniTaskerException("Invalid number use a positive integer larger than 0");
                     }
@@ -273,9 +286,9 @@ public class AddCommand implements Command {
                 } catch (NumberFormatException e) {
                     throw new UniTaskerException("Invalid month value");
                 }
-            } else if (sentence[sentence.length - 2].equals("/date")) {
+            } else if (sentence[indexOfLimitOption].equals("/date")) {
                 try {
-                    endDate = DateUtils.parse(sentence[sentence.length - 1], false);
+                    endDate = DateUtils.parse(sentence[indexOfMonthDateLimit], false);
                 } catch (IllegalDateException e) {
                     throw new UniTaskerException("Date is invalid, "
                             + "follow format /date dd-MM-yyyy and keep date within limit");
@@ -287,9 +300,10 @@ public class AddCommand implements Command {
                 throw new UniTaskerException("End date exceeds the allowed year limit of "
                         + container.getEndYear());
             }
-            validateEvents(container, from, eventCategoryIndex, eventDetails, to);
+            String desc = eventDetails[INDEX_OF_DEADLINE_EVENT_DESCRIPTION];
+            validateEvents(container, from, eventCategoryIndex, desc, to);
             container.categories().addRecurringWeeklyEvent(
-                    eventCategoryIndex, eventDetails[0], from, to,
+                    eventCategoryIndex, desc, from, to,
                     container.calendar(), (months == 0 ? endDate : null), months);
 
             EventUi.printRecurringEventAdded(container.categories().getLatestEvent(eventCategoryIndex));
@@ -305,22 +319,29 @@ public class AddCommand implements Command {
     }
 
     private static void validateEvents(AppContainer container, LocalDateTime from, int eventCategoryIndex,
-        String[] eventDetails, LocalDateTime to) throws OverlapEventException {
+        String desc, LocalDateTime to) throws OverlapEventException {
         TaskValidator.validateWorkload(
                 container.categories(), from, container.getDailyTaskLimit());
         TaskValidator.validateUniqueTask(
-                container.categories(), eventCategoryIndex, eventDetails[0]);
+                container.categories(), eventCategoryIndex, desc);
         TaskValidator.validateNoOverlap(
                 container.categories().getCategory(eventCategoryIndex).getEventList(), from, to);
     }
 
     //@@author sushmiithaa
-    private String[] getToComponents(String[] eventTimeDetails) throws UniTaskerException {
-        String[] toComponents = eventTimeDetails[1].split(" ");
-        if (toComponents.length < 2) {
-            throw new UniTaskerException("Missing end day or time after '/to'. "
-                    + "Expected: /to <day> <time> e.g. /to Friday 1800");
+    private String[] getFromToComponents(String[] eventTimeDetails,boolean isFrom) throws UniTaskerException {
+        String[] components = eventTimeDetails[(isFrom ? 0:1)].split(" ");
+        if (isFrom) {
+            if (components.length != MIN_LENGTH_OF_TOFROM_COMPONENTS) {
+                throw new UniTaskerException("Missing start day or time after '/from'. "
+                        + "Expected: /from <day> <time> e.g. /from Friday 1600");
+            }
+        } else {
+            if (components.length < MIN_LENGTH_OF_TOFROM_COMPONENTS) {
+                throw new UniTaskerException("Missing end day or time after '/to'. "
+                        + "Expected: /to <day> <time> e.g. /to Friday 1800");
+            }
         }
-        return toComponents;
+        return components;
     }
 }
