@@ -60,7 +60,7 @@ The `AppContainer` component,
 
 ![StorageClassDiagram](pictures/StorageClassDiagram.png)
 
-The `Storage` consists of the following:
+The `Storage` component consists of the following:
 - `String todoFilePath` - path to the local file storing todo tasks
 - `String deadlineFilePath` - path to the  local file storing deadline tasks
 - `String eventFilePath` - path to the local file storing event tasks
@@ -114,11 +114,91 @@ How the `Command` component works:
 
 ## Implementation
 
-**Deadline Class Diagram**
+### CategoryList Class Diagram
+
+The figure below illustrates the high-level structure of `CategoryList` within the `AppContainer`.
+
+![CategoryList Class Diagram](pictures/CategoryListClassDiagram.png)
+
+`CategoryList` consists of a collection of `Category` objects. Each `Category` contains three task lists:
+- `TodoList`
+- `DeadlineList`
+- `EventList`
+
+These task lists store their corresponding task types:
+- `TodoList` stores `Todo` objects
+- `DeadlineList` stores `Deadline` objects
+- `EventList` stores `Event` objects
+
+All task types inherit from the abstract `Task` class, while the three task list types inherit from the abstract `TaskList` class.
+
+The `CategoryList` class:
+- acts as the central data structure for storing and accessing all categories
+- allows unified control over todos, deadlines, and events through their parent categories
+- provides methods for category-level operations such as adding, deleting, and reordering categories
+- provides methods for task-level operations such as adding, deleting, marking, unmarking, reordering, and setting priorities
+- serves as the main model component accessed by commands through the `AppContainer`
+
+This design allows related tasks to be grouped under a category, making it easier for users 
+to organize work by module or context. It also improves maintainability by centralizing 
+task management logic within `CategoryList` and `Category`, instead of scattering it 
+across multiple unrelated classes.
+
+### Delete Marked Command
+
+The `delete marked` command allows users to remove all completed tasks in a single command.
+
+![Delete Marked Sequence Diagram](pictures/DeleteMarkedSequenceDiagram.png)
+
+The sequence diagram above shows how the `delete marked` command is handled by `DeleteCommand`.
+
+#### How it works
+
+1. The user enters the `delete marked` command.
+2. `DeleteCommand` retrieves the `CategoryList` from the `AppContainer`.
+3. `DeleteCommand` calls `deleteMarkedTasks()` on `CategoryList`.
+4. `CategoryList` iterates through all `Category` objects it stores.
+5. For each `Category`, `deleteMarkedTasks()` is called.
+6. Each `Category` then removes marked tasks from all three task lists:
+    - `TodoList`
+    - `DeadlineList`
+    - `EventList`
+7. After deletion is complete, a confirmation message is printed through the `UI`.
+8. The updated data is saved through `Storage`.
+9. The calendar is refreshed to keep it consistent with the updated task data.
+
+#### Design Rationale
+
+This feature demonstrates that `CategoryList` acts as the central access point for all categories and their associated task lists.
+
+By delegating the deletion process through `CategoryList` and `Category`:
+- the command layer does not need to access `TodoList`, `DeadlineList`, and `EventList` directly
+- task management logic remains encapsulated within the model
+- bulk operations can be applied consistently across all task types
+
+This design improves modularity and keeps command logic simple, while allowing `CategoryList` to coordinate operations affecting all three task lists.
+
+### Deadline Class Diagram
 
 The figure below illustrates the relationship between Deadline class and the following classes: Task, Timed, Calendar, DateUtils, DeadlineList, TaskList. 
 
 ![Deadline Class Diagram](pictures/deadlineClassDiagram.png)
+
+The `Deadline` class consists of the following members:
+- `logger` - private logger instance used for fin-grained diagnostic logging on object creation
+- `by` stores the due date and time (LocalDateTime) by which the task must be completed
+- `Deadline (description, by)` - constructor that initializes the task with a description and deadline, delegating to the parent `Task`
+- `parseDateTime(input)` – static helper that delegates to DateUtils to parse a date/time string into a LocalDateTime 
+- `getBy()` – returns the raw deadline date/time 
+- `getDate()` – satisfies the Timed interface by delegating to getBy(), enabling calendar and sorting integrations 
+- `toFileFormat()` – serialises the task into pipe-delimited storage format (D | done | description | datetime)
+- `toString()` – produces a human-readable representation prefixed with [D]
+
+The `Deadline` class,
+
+- Extends `Task` to inherit description and completion state, adding only the `by` field to keep deadline-specific logic self-contained 
+- Implements the `Timed` interface so that `Calendar` can register and sort `Deadline` objects polymorphically without depending on the concrete type 
+- Delegates all date parsing to `DateUtils`, ensuring consistent validation and formatting rules are applied uniformly across task types
 
 ### Event commands
 Event commands include adding non-recurring events,

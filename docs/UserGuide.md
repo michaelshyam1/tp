@@ -195,58 +195,73 @@ Examples:
 ---
 ### Mark Command: `mark`
 #### Mark Task (Todos and Deadlines) `mark [TASKTYPE]`
-Mark an existing task (todos and deadlines) in the category.
+Mark existing task(s) (todos and deadlines) in a category.
 
-Format: `mark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`
+Format: `mark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]...`
 
 - TASKTYPE : `todo`, `deadline`, 
 - CATEGORYINDEX: Integer value up to number of categories added
-- TASKINDEX: Integer value up to number of tasks in the category
+- TASKINDEX: One or more integer values corresponding to tasks in the category
 
-Example: `mark todo 1 1`
+**Examples:**
+- `mark todo 1 1`
+- `mark todo 1 1 2 3 4`
+
 
 #### Mark Events `mark [EVENTTYPE]`
-Mark an existing event in the category.
+Mark existing event(s) in the category.
 
-Format: `mark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]`
+Format: `mark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]...`
 
 - EVENTTYPE : `event`, `occurrence`
 - CATEGORYINDEX: Integer value up to number of categories added
-- UIINDEX: follow the UI index for its respective list type:
+- UIINDEX: follow the one or more UI index(es) for its respective list type:
   - `mark occurrence [CATEGORYINDEX] [UIINDEX]` → `list occurrence [CATEGORYINDEX] [UIINDEX]`
   - `mark event [CATEGORYINDEX] [UIINDEX]` → `list event` or `list event /all` or `list event /normal`
 
-Example: `mark event 1 1` `mark occurrence 1 1`
+Example: 
 
-*Note*: *For marking events always use its respective list views first before using its mark operations to match the index to mark (shown above under UIINDEX description)*
+`mark event 1 1` `mark occurrence 1 1`
+`mark event 1 1 3` `mark occurrence 1 1 2`
+
+*Note*: 
+- *For marking events always use its respective list views first before using its mark operations to match the index to mark (shown above under UIINDEX description)*
+- *For multiple marking of events e.g. `mark event 1 1 3` if 3/1 is a recurring group it will not be marked*
 
 
 ### Unmark Command: `unmark`
 #### Unmark Task (Todos and Deadlines) `unmark [TASKTYPE]`
-Unmark an existing task (todos and deadlines) in the category. 
+Unmark existing task(s) (todos and deadlines) in the category.
 
-Format: `unmark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`
+Format: `unmark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]...`
 
-- TASKTYPE : `todo`, `deadline`, 
+- TASKTYPE : `todo`, `deadline`,
 - CATEGORYINDEX: Integer value up to number of categories added
-- TASKINDEX: Integer value up to number of tasks in the category
+- TASKINDEX: One or more integer values corresponding to tasks in the category
 
-Example: `unmark deadline 1 1`
+**Examples:**
+- `unmark deadline 1 1`
+- `unmark deadline 1 1 2 3 4`
 
 #### Unmark Events `unmark [EVENTTYPE]`
-Unmark an existing event in the category.
+Unmark existing event(s) in the category.
 
-Format: `unmark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]`
+Format: `unmark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]...`
 
 - EVENTTYPE : `event`, `occurrence`
 - CATEGORYINDEX: Integer value up to number of categories added
-- UIINDEX: follow the UI index for its respective list type:
+- UIINDEX: follow the one or more UI index(es) for its respective list type:
   - `unmark occurrence [CATEGORYINDEX] [UIINDEX]` → `list occurrence [CATEGORYINDEX] [UIINDEX]`
   - `unmark event [CATEGORYINDEX] [UIINDEX]` → `list event` or `list event /all` or `list event /normal`
 
-Example: `unmark event 1 1` `unmark occurrence 1 1`
+Example: 
+`unmark event 1 1` `unmark occurrence 1 1`
+`mark event 1 1 3` `mark occurrence 1 1 2`
 
-*Note*: *For unmarking events always use its respective list views first before using its unmark operations to match the index to unmark (shown above under UIINDEX description)*
+*Note*: 
+- *For unmarking events always use its respective list views first before using its unmark operations to match the index to unmark (shown above under UIINDEX description)*
+- *For multiple unmarking of events e.g. `unmark event 1 1 3` if 3/1 is a recurring group it will not be unmarked*
+
 
 ---
 
