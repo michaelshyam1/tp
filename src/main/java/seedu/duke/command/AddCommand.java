@@ -22,7 +22,6 @@ import seedu.duke.ui.CategoryUi;
 import seedu.duke.ui.DeadlineUi;
 import seedu.duke.ui.ErrorUi;
 import seedu.duke.ui.EventUi;
-import seedu.duke.ui.GeneralUi;
 import seedu.duke.ui.TaskUi;
 import seedu.duke.util.DateUtils;
 import seedu.duke.util.TaskValidator;
