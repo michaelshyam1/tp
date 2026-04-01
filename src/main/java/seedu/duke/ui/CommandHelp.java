@@ -5,7 +5,7 @@ package seedu.duke.ui;
  * Provides contextual help for each mode and command.
  */
 public class CommandHelp {
-    private static final String DOTTED_LINE = "____________________________________________________________";
+    private static final String DOTTED_LINE = "______________________________________________________________________";
 
     /**
      * Get general help showing all 4 modes and basic commands.
@@ -132,6 +132,8 @@ public class CommandHelp {
                 "MARK/UNMARK:\n" +
                 "  mark event <cat_idx> <idx>\n" +
                 "  unmark event <cat_idx> <idx>\n" +
+                "  mark occurrence <cat_idx> <idx>\n" +
+                "  unmark occurrence <cat_idx> <idx>\n" +
                 "\n" +
                 "DELETE:\n" +
                 "  delete event <cat_idx> <idx>\n" +
