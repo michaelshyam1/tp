@@ -50,7 +50,10 @@ public class TaskUi {
         }
     }
 
-    public static void printBatchResult(String taskType, int successCount, ArrayList<String> invalidIndexes, boolean isMark) {
+    public static void printBatchResult(String taskType,
+                                        int successCount,
+                                        ArrayList<String> invalidIndexes,
+                                        boolean isMark) {
         GeneralUi.printDottedLine();
         String action = isMark ? "Marked" : "Unmarked";
 
