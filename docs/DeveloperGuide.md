@@ -190,8 +190,8 @@ The `Deadline` class consists of the following members:
 - `Deadline (description, by)` - constructor that initializes the task with a description and deadline, delegating to the parent `Task`
 - `parseDateTime(input)` – static helper that delegates to DateUtils to parse a date/time string into a LocalDateTime 
 - `getBy()` – returns the raw deadline date/time 
-- `getDate()` – satisfies the Timed interface by delegating to getBy(), enabling calendar and sorting integrations 
-- `toFileFormat()` – serialises the task into pipe-delimited storage format (D | done | description | datetime)
+- `getDate()` – satisfies the Timed interface by delegating to getBy(), enabling calendar and sorting integrations
+- `toFileFormat()` – serialises the task into pipe-delimited storage format (D, done, description, datetime)
 - `toString()` – produces a human-readable representation prefixed with [D]
 
 The `Deadline` class,
@@ -303,7 +303,7 @@ Note:
 - Java assertions are used throughout the codebase to validate preconditions and invariants, such as ensuring task descriptions and category names are non-empty.
 - The CategoryList acts as a central task management hub, interfacing with multiple specialized task lists (TodoList, DeadlineList, EventList) to maintain separation of concerns.
 
-### Feature: Task Validation ###
+### Helper functions: Task Validation ###
 
 There are two main types of validations for task. 
 
