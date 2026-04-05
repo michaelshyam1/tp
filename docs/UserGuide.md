@@ -25,6 +25,11 @@ Command Line Interface (CLI).
     - [Unmarking a todo/deadline: `todo` `deadline`](#unmark-task-todos-and-deadlines-unmark-tasktype)
     - [Unmarking an event (recurring, non-recurring, occurrence): `event` `recurring` `occurrence`](#unmark-events-unmark-eventtype)
   - [Listing tasks: `list`](#list-command-list)
+    - [Listing categories: `list category`](#list-category-list-category)
+    - [Listing todos: `list todo`](#list-todo-list-todo)
+    - [Listing deadlines: `list deadline`](#list-deadline-list-deadline)
+    - [Listing limit: `list limit`](#list-limit-list-limit)
+    - [Listing range: `list range`](#list-range-list-range)
     - [Listing events (main list): `event`](#list-event-list-event)
     - [Listing recurring events (groups of recurring events): `recurring`](#list-recurring-list-recurring)
     - [Listing occurrence (recurring events within a group): `occurrence`](#list-occurrence-list-occurrence)
@@ -36,7 +41,6 @@ Command Line Interface (CLI).
   - [Find tasks: `find`](#find-command-find)
   - [Set limit to number of tasks or year: `limit`](#limit-command-limit-)
   - [See reminders for tasks: `reminder`](#reminder-command-reminder)
-  - [Exiting the program: `exit`](#exit-program-exit)
   - [Course commands: `course`](#course-command-course)
     - [Add course: `course add`](#add-course-course-add)
     - [Delete course: `course delete`](#delete-course-course-delete)
@@ -46,6 +50,8 @@ Command Line Interface (CLI).
     - [Record score: `course score`](#record-score-course-score)
     - [Delete assessment: `course delete-assessment`](#delete-assessment-course-delete-assessment)
   - [Undo: `undo`](#undo-command-undo)
+  - [Exiting the program: `exit`](#exit-program-exit)
+
 - [FAQ](#faq)
 - [Command Summary](#command-summary)
 
@@ -85,7 +91,7 @@ Format: `add category [name]`
 
 Adds a todo item under a specific category.
 
-Format: `add todo [categoryIndex] [description] /p [priorityValue]`
+Format: `add todo [CATEGORYINDEX] [DESCRIPTION] /p [PRIORITYVALUE]`
 
 - `categoryIndex`: Integer value corresponding to the category
 - `description`: Description of the task
@@ -103,7 +109,7 @@ Format: `add todo [categoryIndex] [description] /p [priorityValue]`
 
 Adds a deadline with a specified due date and time.
 
-Format: `add deadline [categoryIndex] [description] /by [date time]`
+Format: `add deadline [CATEGORYINDEX] [DESCRIPTION] /by [DATE TIME]`
 
 - `categoryIndex`: Integer value corresponding to the category
 - `description`: Description of the task
@@ -120,16 +126,14 @@ Format: `add deadline [categoryIndex] [description] /by [date time]`
 
 Adds an event with a start and end time.
 
-Format: `add event [categoryIndex] [description] /from [start] /to [end]`
+Format: `add event [CATEGORYINDEX] [DESCRIPTION] /from [START] /to [END]`
 
 - `categoryIndex`: Integer value corresponding to the category
 - `description`: Description of the event
 - `/from`: Keyword indicating event start time
 - `/to`: Keyword indicating event end time
 - `start` and `end`: Format `dd-MM-yyyy HHmm`
-- `description`: Description of the event
-- `/from`: Start date and time
-- `/to`: End date and time
+
 
 **Example:**
 
@@ -141,16 +145,35 @@ Format: `add event [categoryIndex] [description] /from [start] /to [end]`
 
 Adds a weekly recurring event.
 
-Format: `add recurring [categoryIndex] weekly event [description] /from [day time] /to [day time]`
+Format: `add recurring [CATEGORYINDEX] weekly event [DESCRIPTION] /from [DAY TIME] /to [DAY TIME] (/date or /month) [END DURATION]`
 
 - `categoryIndex`: Integer value corresponding to the category
 - `description`: Description of the event
 - `/from`: Start day and time (e.g. Friday 1600)
 - `/to`: End day and time
+- `day time`: Format `EEEE HHmm` where EEE is Monday, Tuesday, Wednesday, Thursday, Friday
+- `/date` or `/month` : (optional) end duration for the recurring group
+- `end duration` : (optional) number of months or end date , Format for end date: `dd-MM-yyyy`
+
+````
+______________________________________________________________________
+add recurring 1 weekly event lecture /from Friday 1030 /to Friday 1130 /month 2
+______________________________________________________________________
+This recurring event has been added:
+[RE][ ] lecture (from: Friday 1030 to: Friday 1130)
+______________________________________________________________________
+add recurring 1 weekly event CS2113 lecture /from Friday 1600 /to Friday 1800 /date 24-04-2026
+______________________________________________________________________
+This recurring event has been added:
+[RE][ ] CS2113 lecture (from: Friday 1600 to: Friday 1800)
+______________________________________________________________________
+````
 
 **Examples:**
 
 `add recurring 1 weekly event CS2113 lecture /from Friday 1600 /to Friday 1800`
+
+*Note*: *Use `/date or /month` but not both to set the end duration*
 
 ---
 
@@ -192,6 +215,79 @@ Format: `delete [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]`
   - do `list recurring` → then `delete recurring [CATEGORYINDEX] [UIINDEX]` 
   - do `list event` or `list event /all` or `list event /normal` → then `delete event [CATEGORYINDEX] [UIINDEX]`
 
+````
+______________________________________________________________________
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][ ] meeting (from: 04-04-2026 1000 to: 04-04-2026 1100)
+2. [E][ ] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+3. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+4. [RE]lecture (from: Friday 1030 to: Friday 1130)
+5. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+6. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+delete event 1 1
+______________________________________________________________________
+This event has been deleted:
+[E][ ] meeting (from: 04-04-2026 1000 to: 04-04-2026 1100)
+______________________________________________________________________
+````
+
+````
+______________________________________________________________________
+list recurring
+______________________________________________________________________
+ALL RECURRING EVENTS
+______________________________________________________________________
+[1]school:
+1. [RE]lecture (from: Friday 1030 to: Friday 1130)
+2. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+3. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+delete recurring 1 1
+______________________________________________________________________
+This recurring event has been deleted:
+[RE]lecture (from: Friday 1030 to: Friday 1130)
+______________________________________________________________________
+````
+
+````
+______________________________________________________________________
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][ ] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+2. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+3. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+4. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+list occurrence 1 3
+______________________________________________________________________
+OCCURRENCES FOR: CS2113 lecture
+______________________________________________________________________
+[1]school:
+1. [RE][ ] CS2113 lecture (from: 10-04-2026 1600 to: 10-04-2026 1800)
+2. [RE][ ] CS2113 lecture (from: 17-04-2026 1600 to: 17-04-2026 1800)
+3. [RE][ ] CS2113 lecture (from: 24-04-2026 1600 to: 24-04-2026 1800)
+
+______________________________________________________________________
+delete occurrence 1 1
+______________________________________________________________________
+This recurring event has been deleted:
+[RE][ ] CS2113 lecture (from: 10-04-2026 1600 to: 10-04-2026 1800)
+______________________________________________________________________
+````
+
+
+
 Examples:
 
 `delete occurrence 1 1`
@@ -230,7 +326,59 @@ Format: `mark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]...`
   - do `list occurrence [CATEGORYINDEX] [UIINDEX]` → then `mark occurrence [CATEGORYINDEX] [UIINDEX]`
   - do `list event` or `list event /all` or `list event /normal`
     → then `mark event [CATEGORYINDEX] [UIINDEX]` 
-Example: 
+
+````
+______________________________________________________________________
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][ ] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+2. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+3. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+4. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+mark event 1 1
+______________________________________________________________________
+This task is marked as done:
+[E][X] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+______________________________________________________________________
+Marked 1 event(s) successfully.
+````
+
+````
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][X] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+2. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+3. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+4. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+list occurrence 1 3
+______________________________________________________________________
+OCCURRENCES FOR: CS2113 lecture
+______________________________________________________________________
+[1]school:
+1. [RE][ ] CS2113 lecture (from: 10-04-2026 1600 to: 10-04-2026 1800)
+2. [RE][ ] CS2113 lecture (from: 17-04-2026 1600 to: 17-04-2026 1800)
+3. [RE][ ] CS2113 lecture (from: 24-04-2026 1600 to: 24-04-2026 1800)
+
+______________________________________________________________________
+mark occurrence 1 2
+______________________________________________________________________
+This task is marked as done:
+[RE][X] CS2113 lecture (from: 17-04-2026 1600 to: 17-04-2026 1800)
+______________________________________________________________________
+Marked 1 event(s) successfully.
+````
+
+**Examples**: 
 
 `mark event 1 1` `mark occurrence 1 1`
 `mark event 1 1 3` `mark occurrence 1 1 2`
@@ -266,6 +414,56 @@ Format: `unmark [EVENTTYPE] [CATEGORYINDEX] [UIINDEX]...`
   - do `list occurrence [CATEGORYINDEX] [UIINDEX]` -> then `unmark occurrence [CATEGORYINDEX] [UIINDEX]` 
   - do `list event` or `list event /all` or `list event /normal` -> then `unmark event [CATEGORYINDEX] [UIINDEX]`
 
+````
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][X] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+2. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+3. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+4. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+unmark event 1 1
+______________________________________________________________________
+This task is marked as not done:
+[E][ ] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+______________________________________________________________________
+Unmarked 1 event(s) successfully.
+````
+
+````
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][ ] consultation (from: 10-04-2026 1800 to: 10-04-2026 1900)
+2. [E][ ] session (from: 11-04-2026 1800 to: 11-04-2026 1900)
+3. [RE]CS2113 lecture (from: Friday 1600 to: Friday 1800)
+4. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+list occurrence 1 3
+______________________________________________________________________
+OCCURRENCES FOR: CS2113 lecture
+______________________________________________________________________
+[1]school:
+1. [RE][ ] CS2113 lecture (from: 10-04-2026 1600 to: 10-04-2026 1800)
+2. [RE][X] CS2113 lecture (from: 17-04-2026 1600 to: 17-04-2026 1800)
+3. [RE][ ] CS2113 lecture (from: 24-04-2026 1600 to: 24-04-2026 1800)
+
+______________________________________________________________________
+unmark occurrence 1 2
+______________________________________________________________________
+This task is marked as not done:
+[RE][ ] CS2113 lecture (from: 17-04-2026 1600 to: 17-04-2026 1800)
+______________________________________________________________________
+Unmarked 1 event(s) successfully.
+````
+
 Example: 
 `unmark event 1 1` `unmark occurrence 1 1`
 `mark event 1 1 3` `mark occurrence 1 1 2`
@@ -278,41 +476,68 @@ Example:
 ---
 
 ### List Command: `list`
-Displays a list of tasks. 
+Displays a list of tasks. The `list` command can be used with the following keywords: 
+`category`, `todo`, `deadline`, `range`, `limit`, `event`, `recurring`, `occurence`
 
-- `list` can be used to create a list on the following: `category`, `todo`, `deadline`, `event`, `recurring`, `range`
+---
 
-List out all tasks based on key word
+#### List Category: `list category`
+List all categories or one selected category.
 
-Format :
+Format: `list category [CATEGORYINDEX]`
 
-list [KEYWORD] [CATEGORYINDEX] [START] [END] [TASKTYPE]
+- categoryIndex: Optional argument. Integer value up to number of categories added.
 
-- KEYWORD: `category`,`todo`,`deadline`,`range`,`limit`
-- CATEGORYINDEX: Integer value up to number of categories added
+Examples: `list category`, `list category 1`
+
+---
+
+#### List Todo: `list todo`
+Lists all todos in every category
+
+Format: `list todo`
+
+Example: `list todo`
+
+---
+
+#### List Deadline: `list deadline`
+Lists all deadlines in every category
+
+Format: `list deadline`
+
+Example: `list deadline`
+
+---
+
+#### List Limit: `list limit`
+Shows the current year range and daily task limit.
+
+Format: `list limit`
+
+Example: `list limit`
+
+---
+
+#### List Range: `list range`
+Shows all deadlines and/or events within a date range
+
+Format: `list range [START] [END] [FLAG]`
+
 - START: Start date
 - END: End date
-- TASKTYPE: `/deadline`, `/event`
+- FLAG: Optional flag that is either `/deadline` or `/event`
 
-Examples:
+Examples: 
+`list range 25-06-2026 27-06-2026`
+`list range 25-06-2026 27-06-2026 /deadline`
+`list range 25-06-2026 27-06-2026 /event`
 
-`list deadline` `list deadline 1` 
-
-`list limit`
-
-`list range 25-04-2026 27-04-2026`
-`list range 25-04-2026 27-04-2026 /deadline`
-
-*Note*: 
-
-- *CategoryIndex is not needed for limit*
-- *Start and End are only applicable for Deadline and Event*
-- *Add tasktype after end if you want to see only deadline or event*
+---
 
 #### List Event: `list event`
-Format: list [KEYWORD] [TYPE]
+Format: `list event [TYPE]`
 
-- KEYWORD: `event`
 - TYPE: `/normal`, `/all`
 
 `list event /normal` shows non-recurring events
@@ -331,9 +556,7 @@ Examples:
 #### List Recurring: `list recurring`
 List recurring shows groups of recurring events.
 
-Format : list [KEYWORD]
-
-- KEYWORD: `recurring`
+Format : `list recurring`
 
 Examples:
 
@@ -344,11 +567,33 @@ Examples:
 #### List Occurrence: `list occurrence`
 List occurrence shows all events within a recurring group.
 
-Format: list [KEYWORD] [CATEGORYINDEX] [UIINDEX]
+Format: `list occurence [CATEGORYINDEX] [UIINDEX]`
 
-- KEYWORD: `occurrence`
 - CATEGORYINDEX: Integer value up to number of categories added
 - UIINDEX: Positive integer displayed in `list event` or `list event /all`
+
+````
+list event
+______________________________________________________________________
+ALL EVENTS
+______________________________________________________________________
+[1]school:
+1. [E][ ] meeting (from: 04-04-2026 1000 to: 04-04-2026 1100)
+2. [RE]CS2113 seminar (from: Friday 2000 to: Friday 2100)
+
+______________________________________________________________________
+list occurrence 1 2
+______________________________________________________________________
+OCCURRENCES FOR: CS2113 seminar
+______________________________________________________________________
+[1]school:
+1. [RE][ ] CS2113 seminar (from: 03-04-2026 2000 to: 03-04-2026 2100)
+2. [RE][ ] CS2113 seminar (from: 10-04-2026 2000 to: 10-04-2026 2100)
+3. [RE][ ] CS2113 seminar (from: 17-04-2026 2000 to: 17-04-2026 2100)
+4. [RE][ ] CS2113 seminar (from: 24-04-2026 2000 to: 24-04-2026 2100)
+
+______________________________________________________________________
+````
 
 Examples:
 
@@ -424,14 +669,12 @@ Example: `find assignment`
 Sets a limit on the following: task,year,...
 Allow user to set the limit for the following: `Task`, `Year`
 
-Format:
-
-limit [KEYWORD] [INT]
+Format: `limit [KEYWORD] [INT]`
 
 - KEYWORD: `task`, `year`
 - INT: Integer value
 
-Example:
+Examples:
 
 `limit task 5` 
 
@@ -449,16 +692,6 @@ Format:
 `reminder`
 
 *Note*: *Anything after 'reminder' will be ignored*
-
----
-### Exit program: `exit`
-Exits the program
-
-Format:
-
-`exit`
-
-*Note*: *Anything after 'exit' will be ignored*
 
 ---
 
@@ -567,6 +800,17 @@ Format: `undo`
 
 ---
 
+### Exit program: `exit`
+Exits the program
+
+Format:
+
+`exit`
+
+*Note*: *Anything after 'exit' will be ignored*
+
+---
+
 ## FAQ
 
 **Q**: How do I transfer my data to another computer? 
@@ -576,20 +820,20 @@ is located in the other computer.
 
 ## Command Summary
 
-| Action      | Format, Examples                                                                                                                                                                                                                                                                             | 
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| help        | `help`                                                                                                                                                                                                                                                                                       |
-| add         | `add category [DESC]`, `add todo [CATEGORYINDEX] [DESC]`, <br/> `add todo [categoryIndex] [description] /p [priorityValue]`,                                                                                                                                                                 |
-| delete      | `delete [KEYWORD] [CATEGORYINDEX] [TASKINDEX]`, `delete [KEYWORD] [CATEGORYINDEX] all`                                                                                                                                                                                                       |
-| list        | `list [keyword] [CATEGORYINDEX] [TASKINDEX]`                                                                                                                                                                                                                                                 |
-| mark/unmark | `mark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`, `unmark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`                                                                                                                                                                                               |
-| reorder     | `reorder category [FROMINDEX] [TOINDEX]`, `reorder todo [CATEGORYINDEX] [FROMINDEX] [TOINDEX]`                                                                                                                                                                                               |
-| priority    | `priority todo [CATEGORYINDEX] [TODOINDEX] [PRIORITYVALUE]`                                                                                                                                                                                                                                  |
-| sort        | `sort todo [CATEGORYINDEX]`                                                                                                                                                                                                                                                                  |
-| find        | `find [SUBSTRING]`                                                                                                                                                                                                                                                                           |
-| limit       | `limit [keyword]`                                                                                                                                                                                                                                                                            |
-| reminder    | `reminder`                                                                                                                                                                                                                                                                                   |
-| course      | `course add [COURSE_CODE]`, `course delete [COURSE_CODE]`, `course list`, `course view [COURSE_CODE]`, `course add-assessment [COURSE_CODE] /n [NAME] /w [WEIGHTAGE] /ms [MAX_SCORE]`, `course score [COURSE_CODE] /n [NAME] /s [SCORE]`, `course delete-assessment [COURSE_CODE] /n [NAME]` |                                                                                                           |
-| undo        | `undo`                                                                                                                                                                                                                                                                                       |
-| exit        | `exit`                                                                                                                                                                                                                                                                                       |
+| Action      | Format, Examples                                                                                                                                                                                                                                                                                                                 | 
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| help        | `help`                                                                                                                                                                                                                                                                                                                           |
+| add         | `add category [DESC]`, `add todo [CATEGORYINDEX] [DESCRIPTION] /p [PRIORITYVALUE]`, <br/> `add deadline [CATEGORYINDEX] [DESCRIPTION] /by [DATE TIME]`, <br/> `add event [CATEGORYINDEX] [DESCRIPTION] /from [START] /to [END]`, <br/> `add recurring [CATEGORYINDEX] weekly event [DESCRIPTION] /from [DAY TIME /to [DAY TIME]` |
+| delete      | `delete [KEYWORD] [CATEGORYINDEX] [TASKINDEX]`, `delete [KEYWORD] [CATEGORYINDEX] all`                                                                                                                                                                                                                                           |
+| list        | `list category [CATEGORYINDEX]`, `list todo`, `list deadline`, `list limit`, `list range [START] [END] [FLAG]`, <br/> `list event [TYPE]`, `list recurring`, `list occurence [CATEGORYINDEX] [UIINDEX]`                                                                                                                          |
+| mark/unmark | `mark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`, `unmark [TASKTYPE] [CATEGORYINDEX] [TASKINDEX]`                                                                                                                                                                                                                                   |
+| reorder     | `reorder category [FROMINDEX] [TOINDEX]`, `reorder todo [CATEGORYINDEX] [FROMINDEX] [TOINDEX]`                                                                                                                                                                                                                                   |
+| priority    | `priority todo [CATEGORYINDEX] [TODOINDEX] [PRIORITYVALUE]`                                                                                                                                                                                                                                                                      |
+| sort        | `sort todo [CATEGORYINDEX]`                                                                                                                                                                                                                                                                                                      |
+| find        | `find [SUBSTRING]`                                                                                                                                                                                                                                                                                                               |
+| limit       | `limit [KEYWORD] [INT]`                                                                                                                                                                                                                                                                                                          |
+| reminder    | `reminder`                                                                                                                                                                                                                                                                                                                       |
+| course      | `course add [COURSE_CODE]`, `course delete [COURSE_CODE]`, `course list`, <br/> `course view [COURSE_CODE]`, `course add-assessment [COURSE_CODE] /n [NAME] /w [WEIGHTAGE] /ms [MAX_SCORE]`, <br/> `course score [COURSE_CODE] /n [NAME] /s [SCORE]`, `course delete-assessment [COURSE_CODE] /n [NAME]`                         |                                                                                                           |
+| undo        | `undo`                                                                                                                                                                                                                                                                                                                           |
+| exit        | `exit`                                                                                                                                                                                                                                                                                                                           |
 
