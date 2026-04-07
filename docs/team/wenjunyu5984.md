@@ -52,6 +52,6 @@ Added JUnit tests for the following classes:
 
 **Review/Mentoring Contributions**
 - Reviewed PRs and provided feedback
-- Guided group member on how to push and pull commits to Github
+- Guided group member on how to push and pull commits to GitHub
 
 
