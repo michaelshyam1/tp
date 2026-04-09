@@ -48,9 +48,10 @@ Added JUnit tests for the following classes:
 **User Guide Contributions**
 
 - Added documentation for the following features:
-  - `delete`, `list`, `limit`
+  - `delete`, `list`, `limit`, `deadline`
 
 **Review/Mentoring Contributions**
 - Reviewed PRs and provided feedback
+- Guided group member on how to push and pull commits to GitHub
 
 
