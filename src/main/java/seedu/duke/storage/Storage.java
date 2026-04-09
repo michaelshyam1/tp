@@ -159,7 +159,6 @@ public class Storage {
 
                 // Strip BOM from the first field (present when file saved on Windows with Notepad).
                 parts[0] = stripBom(parts[0]);
-//                String[] parts = s.nextLine().split(" \\| ");
 
                 if (parts.length == 2 && parts[1].equalsIgnoreCase("C")) {
                     categoryList.addCategory(parts[0].trim());
