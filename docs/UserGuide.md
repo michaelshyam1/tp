@@ -16,6 +16,7 @@ Command Line Interface (CLI).
     - [Adding a recurring event: `recurring`](#add-recurring-event-add-recurring)
   - [Deleting tasks: `delete`](#delete-command-delete)
     - [Deleting a category: `category`](#delete-category-delete-category)
+    - [Deleting marked tasks: `marked`](#delete-marked-delete-marked)
     - [Deleting a todo/deadline: `todo` `deadline`](#delete-task-todos-and-deadlines-delete-tasktype)
     - [Deleting an event (recurring, non-recurring, occurrence): `event` `recurring` `occurrence`](#delete-events-delete-eventtype)
   - [Marking a task: `mark`](#mark-command-mark)
@@ -185,6 +186,13 @@ Delete an existing item on the list. `delete` can be used to delete the followin
 Format: `delete category [CATEGORYINDEX]`
 
 Example: `delete category 1`
+
+#### Delete Marked: `delete marked`
+Deletes all marked tasks.
+
+Format: `delete marked`
+
+Example: `delete marked`
 
 #### Delete Task (Todos and Deadlines): `delete [TASKTYPE]`
 
