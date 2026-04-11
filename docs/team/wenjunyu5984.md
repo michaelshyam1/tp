@@ -30,6 +30,7 @@ General contributions:
 - Implement Calendar class as a central data structure for storing and accessing timed class
 - Implement the general structure for storage class, handling loading, saving and updating of all tasks, taskLimit and endYear.
 - Implement logging configuration
+- Added Limit command for year and task
 - Added Task Validation for all tasks
 - Added Date Validation for all timed task
 
