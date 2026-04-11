@@ -694,7 +694,9 @@ Examples:
 
 *Note 1: Year refers to the furthest year that can be accessed/added to from the list*
 
-*Note 2: Task refers to timed task: `deadline`, `event`*
+*Note 2: Latest Year is set to 2100 and Max task is set to 24*
+
+*Note 3: Task refers to timed task: `deadline`, `event`*
 
 ---
 
