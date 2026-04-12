@@ -189,7 +189,7 @@ public class Category {
      *
      * @param input The substring to search for within task descriptions.
      * @return A new Category containing all matching tasks. If no matches are found,
-     * an empty Category (with the same name) is returned.
+     *         an empty Category (with the same name) is returned.
      */
     public Category findMatches(String input) {
         Category foundCategory = new Category(getName());
