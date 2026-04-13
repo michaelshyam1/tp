@@ -205,7 +205,7 @@ public class AddCommand implements Command {
                         ErrorUi.printMissingDates();
                     }
                 }
-                    return null;
+                return null;
             }
             String description = parts[INDEX_OF_DEADLINE_EVENT_DESCRIPTION].trim();
             String dateString = parts[INDEX_OF_DEADLINE_EVENT_DATETIME].trim();

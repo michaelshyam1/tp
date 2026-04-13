@@ -15,8 +15,6 @@ import seedu.duke.util.DateUtils;
 import seedu.duke.exception.IllegalDateException;
 
 public class ListCommand implements Command {
-    private static final int[] EXACT_LENGTHS = {};
-
     public static final int LIST_MIN_LENGTH = 2;
     public static final int LIST_WITH_INDEX_LENGTH = 3;
     public static final int LIST_RANGE_MIN_LENGTH = 4;
