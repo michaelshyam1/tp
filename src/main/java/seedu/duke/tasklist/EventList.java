@@ -20,7 +20,7 @@ public class EventList extends TaskList<Event> {
         super();
     }
 
-    public String toString() {
+    public String toString(boolean viewType) {
         String result = "";
         Set<Integer> printedGroups = new HashSet<>();
         int uiIndex = 0;
@@ -28,11 +28,11 @@ public class EventList extends TaskList<Event> {
             Event event = tasks.get(i);
             assert event != null : "Event must exist";
             if (event.getIsRecurring() && !printedGroups.contains(event.getRecurringGroupId())) {
-                result = result + (uiIndex+1) + ". " + (event.toStringRecurringList()) + System.lineSeparator();
+                result = result + (viewType? uiIndex+1: i+1) + ". " + (event.toStringRecurring()) + System.lineSeparator();
                 printedGroups.add(event.getRecurringGroupId());
                 uiIndex++;
             } else if (!event.getIsRecurring()) {
-                result = result + (uiIndex+1) + ". " + (event.toString()) + System.lineSeparator();
+                result = result + (viewType? uiIndex+1 : i+1) + ". " + (event.toString()) + System.lineSeparator();
                 uiIndex++;
             }
         }
@@ -92,13 +92,15 @@ public class EventList extends TaskList<Event> {
         int recurringGroupId = event.getRecurringGroupId();
         String eventDescription = event.getDescription();
 
-        while (currentFromDateTime.isBefore(boundaryDateTime)){
-            Event newEvent = new Event(eventDescription,currentFromDateTime,
-                    currentToDateTime,true,recurringGroupId);
-            tasks.add(newEvent);
-            calendar.registerTask(newEvent);
-            currentFromDateTime = currentFromDateTime.plusDays(7);
-            currentToDateTime = currentToDateTime.plusDays(7);
+        while (currentFromDateTime.isBefore(boundaryDateTime)) {
+            if (!(currentFromDateTime.isBefore(LocalDateTime.now()))) {
+                Event newEvent = new Event(eventDescription, currentFromDateTime,
+                        currentToDateTime, true, recurringGroupId);
+                tasks.add(newEvent);
+                calendar.registerTask(newEvent);
+            }
+                currentFromDateTime = currentFromDateTime.plusDays(7);
+                currentToDateTime = currentToDateTime.plusDays(7);
 
         }
     }
