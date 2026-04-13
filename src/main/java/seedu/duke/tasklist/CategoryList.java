@@ -404,11 +404,11 @@ public class CategoryList {
 
     public boolean hasRecurringEvents(int categoryIndex) {
         Category cat = categories.get(categoryIndex);
-            for (int i = 0; i < cat.getEventList().getSize(); i++) {
-                if (cat.getEventList().get(i).getIsRecurring()) {
-                    return true;
-                }
+        for (int i = 0; i < cat.getEventList().getSize(); i++) {
+            if (cat.getEventList().get(i).getIsRecurring()) {
+                return true;
             }
+        }
         return false;
     }
 
