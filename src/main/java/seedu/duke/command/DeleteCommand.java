@@ -24,7 +24,9 @@ public class DeleteCommand implements Command {
     public static final int INDEX_OF_DELETE_TYPE = 1;
     public static final int INDEX_OF_TASK_TO_DELETE = 3;
     public static final int INDEX_OF_CATEGORY_TO_DELETE = 2;
-
+    public static final String DELETE_COMMAND_SPACE_FORMATTING = "                ";
+    public static final String DELETE_SECOND_KEYWORD_CHOICES =
+            "category, marked, todo, deadline, event, occurrence or recurring.";
 
     private final String[] sentence;
 
@@ -35,7 +37,8 @@ public class DeleteCommand implements Command {
     @Override
     public void execute(AppContainer container) {
         if (sentence.length < DELETE_MIN_LENGTH) {
-            ErrorUi.printMissingArgs("Use: delete [type] [index]");
+            ErrorUi.printUnknownCommand("delete",
+                    DELETE_SECOND_KEYWORD_CHOICES);
             return;
         }
 
@@ -43,6 +46,12 @@ public class DeleteCommand implements Command {
 
         try {
             String secondCommand = sentence[INDEX_OF_DELETE_TYPE];
+            if (!isValidDeleteType(secondCommand)) {
+                ErrorUi.printUnknownCommand("delete",
+                        DELETE_SECOND_KEYWORD_CHOICES);
+                return;
+            }
+
             int categoryIndex = -1;
             if (!secondCommand.equals("marked") && !secondCommand.equals("category")) {
                 categoryIndex = CommandSupport.getCategoryIndex(container, sentence);
@@ -162,15 +171,31 @@ public class DeleteCommand implements Command {
             CommandSupport.saveData(container, relevantDate);
             refreshCalendar(container.categories(), container.calendar());
         } catch (ArrayIndexOutOfBoundsException e) {
-            ErrorUi.printMissingArgs("Example: delete todo 1 1");
-        } catch (NumberFormatException e) {
-            ErrorUi.printInvalidNumber();
-        } catch (IndexOutOfBoundsException e) {
-            ErrorUi.printIndexNotFound();
-        } catch (UniTaskerException e) {
-            ErrorUi.printError("Error occurred ", e.getMessage());
+            ErrorUi.printCommandFailed("delete command",
+                    "Insufficient arguments.",
+                    "delete [keyword] [catIndex] [taskIndex]\n" +
+                            DELETE_COMMAND_SPACE_FORMATTING +
+                            "delete [keyword] [catIndex] all\n" +
+                            DELETE_COMMAND_SPACE_FORMATTING +
+                            "delete marked");
         } catch (Exception e) {
-            ErrorUi.printError("An unexpected error occurred", e.getMessage());
+            ErrorUi.printCommandFailed("delete command",
+                    e.getMessage(),
+                    "delete [keyword] [catIndex] [taskIndex]\n" +
+                            DELETE_COMMAND_SPACE_FORMATTING +
+                            "delete [keyword] [catIndex] all\n" +
+                            DELETE_COMMAND_SPACE_FORMATTING +
+                            "delete marked");
         }
+    }
+
+    private boolean isValidDeleteType(String command) {
+        return command.equals("marked")
+                || command.equals("category")
+                || command.equals("todo")
+                || command.equals("deadline")
+                || command.equals("event")
+                || command.equals("recurring")
+                || command.equals("occurrence");
     }
 }
